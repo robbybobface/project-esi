@@ -49,7 +49,8 @@ float h(vec2 p){
 float n(vec2 u){
   vec2 i = floor(u);
   vec2 f = fract(u);
-  f = f*f*(3.0 - 2.0*f);
+  // Quintic Hermite — C2 smooth; cubic smoothstep leaves visible cell ridges on mobile
+  f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
   float a = h(i);
   float b = h(i + vec2(1.0, 0.0));
   float c = h(i + vec2(0.0, 1.0));
@@ -57,15 +58,21 @@ float n(vec2 u){
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-float m(vec2 u){
-  // Extra octave softens posterized ridges that read as banding on mobile GPUs
-  return (n(u)*0.5 + n(u*2.0)*0.25 + n(u*4.0)*0.125) * 0.914;
+// Rotate noise domain; irrational angles so lattice edges don't stack into bands
+vec2 rot(vec2 p, float ang){
+  float s = sin(ang);
+  float c = cos(ang);
+  return vec2(c * p.x - s * p.y, s * p.x + c * p.y);
 }
 
-// Break axis-aligned value-noise cells (portrait + low precision → vertical stripes)
-vec2 rot45(vec2 p){
-  const float s = 0.70710678;
-  return vec2(p.x * s - p.y * s, p.x * s + p.y * s);
+float m(vec2 u){
+  // Each octave on a differently rotated lattice — kills coherent diagonal facets
+  // that a single rot45 left behind on mobile GPUs.
+  float v = n(rot(u, 0.37)) * 0.50;
+  v += n(rot(u * 2.03, 1.91)) * 0.25;
+  v += n(rot(u * 4.11, 2.74)) * 0.125;
+  v += n(rot(u * 8.27, 0.83)) * 0.0625;
+  return v * 0.95;
 }
 
 void main(){
@@ -78,13 +85,15 @@ void main(){
   float dC = length(toC);
   float fall = exp(-dC * 9.0) * ci;
 
+  // Cursor warp samples a separate rotated domain (not the color lattice)
   vec2 sh = vec2(
-    n(rot45(uv) * 5.5 + vec2(t * 0.9,  0.0)),
-    n(rot45(uv) * 5.5 + vec2(0.0, t * 1.1))
+    n(rot(uv, 1.17) * 5.5 + vec2(t * 0.9,  0.0)),
+    n(rot(uv, 2.41) * 5.5 + vec2(0.0, t * 1.1))
   ) - 0.5;
   vec2 disp = sh * fall * 0.55;
 
-  uv = rot45(uv * 4.2 + disp * 4.2);
+  // Mild domain warp only — avoid one global 45° rotate (that made diagonal bands)
+  uv = uv * 4.2 + disp * 4.2 + rot(uv, 0.61) * 0.35;
 
   vec2 d1 = vec2( 0.18,  0.07) * t;
   vec2 d2 = vec2(-0.13,  0.21) * t;

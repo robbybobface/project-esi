@@ -34,6 +34,11 @@ uniform vec3 u_pal_cool;
 uniform vec3 u_pal_cursor;
 uniform vec3 u_pal_rgScale;
 uniform float u_brightness;
+uniform float u_accent;
+// >1 in dark mode: accents only fire in noise peaks (distinct wisps, not fog)
+uniform float u_peak;
+// Cursor trail strength (lower in dark so the follow-glow isn't a spotlight)
+uniform float u_cursorGain;
 
 float h(vec2 p){
   p = fract(p * vec2(123.34, 456.21));
@@ -86,16 +91,22 @@ void main(){
   vec2 d3 = vec2( 0.09, -0.16) * t;
 
   float a = m(uv + d1);
-  // Clamp mix weights — uncapped factors crush into solid color bands on mobile
-  vec3 col = mix(u_pal_base, u_pal_warm, clamp(a * 1.85, 0.0, 1.0));
+  // Peak-shaped mixes: dark mode uses u_peak > 1 so warm/mid read as islands
+  // against navy. Warm (yellow) uses a sharper peak than mid so gold stays
+  // bright where it hits but rare — navy remains the field.
+  float warmAmt = pow(clamp(a, 0.0, 1.0), max(u_peak * 1.35, 1.0)) * 1.75 * u_accent;
+  vec3 col = mix(u_pal_base, u_pal_warm, clamp(warmAmt, 0.0, 1.0));
 
   float b = m(uv + a * 2.0 + d2);
-  col = mix(col, u_pal_mid, clamp(b * 1.35, 0.0, 1.0));
+  float midAmt = pow(clamp(b, 0.0, 1.0), u_peak) * 1.25 * u_accent;
+  col = mix(col, u_pal_mid, clamp(midAmt, 0.0, 1.0));
 
   float dd = m(uv + b * 2.8 + d3);
-  col = mix(col, u_pal_cool, clamp(dd, 0.0, 1.0));
+  // Cool stays softer than mid so depth pockets don't compete with sky wisps
+  float coolAmt = pow(clamp(dd, 0.0, 1.0), max(u_peak * 0.75, 1.0)) * u_accent;
+  col = mix(col, u_pal_cool, clamp(coolAmt, 0.0, 1.0));
 
-  col += u_pal_cursor * fall;
+  col += u_pal_cursor * fall * u_accent * u_cursorGain;
 
   col *= u_pal_rgScale;
   gl_FragColor = vec4(col * u_brightness, 1.0);
@@ -174,6 +185,9 @@ export function ShaderCanvas({ className }: Props): ReactNode {
         u_pal_cursor: { value: [...h0.cursor] },
         u_pal_rgScale: { value: [...h0.rgScale] },
         u_brightness: { value: h0.brightness },
+        u_accent: { value: 1.0 },
+        u_peak: { value: isDarkRef.current ? 2.45 : 1.0 },
+        u_cursorGain: { value: isDarkRef.current ? 0.4 : 1.0 },
       },
     });
     uniformsRef.current = program.uniforms as Record<
@@ -361,6 +375,10 @@ export function ShaderCanvas({ className }: Props): ReactNode {
     (u.u_pal_cursor!.value as number[]).splice(0, 3, ...h.cursor);
     (u.u_pal_rgScale!.value as number[]).splice(0, 3, ...h.rgScale);
     u.u_brightness!.value = h.brightness;
+    u.u_accent!.value = 1.0;
+    // Optional: HMR can leave an older Program without newly-added uniforms
+    if (u.u_peak) u.u_peak.value = isDark ? 2.45 : 1.0;
+    if (u.u_cursorGain) u.u_cursorGain.value = isDark ? 0.4 : 1.0;
   }, [variant, isDark]);
 
   return (

@@ -239,16 +239,17 @@ export const SHADER_VARIANTS: readonly ShaderVariant[] = [
       rgScale: rgb(1.0, 1.0, 1.0),
       brightness: 2.5,
     },
-    // Dark: navy + cyan (not olive) + muted gold — keep hues separated so
-    // mixes don't crush into muddy brown-green
+    // Dark: gate navy field + the same yellow/cyan the vision WaveShader
+    // ribbons use (wave[3]/wave[1]). Peak mixes keep them as distinct notes.
+    // Wisps are a touch dimmer than the vision ribbons so they sit in the field.
     heroDark: {
-      base: rgb(0.020, 0.050, 0.120),
-      warm: rgb(0.380, 0.300, 0.055),
-      mid: rgb(0.050, 0.280, 0.400),
-      cool: rgb(0.025, 0.140, 0.320),
-      cursor: rgb(0.040, 0.110, 0.200),
-      rgScale: rgb(1.0, 1.0, 1.0),
-      brightness: 2.05,
+      base: rgb(0.022, 0.090, 0.165),
+      warm: rgb(1.000, 0.940, 0.280),
+      mid: rgb(0.110, 0.400, 0.580),
+      cool: rgb(0.012, 0.055, 0.110),
+      cursor: rgb(0.100, 0.280, 0.400),
+      rgScale: rgb(0.95, 0.98, 1.12),
+      brightness: 1.32,
     },
     wave: [
       rgb(0.000, 0.280, 0.450),
@@ -327,7 +328,7 @@ export function heroPlaceholderColor(
 ): string {
   const { base, warm, mid, cool } = resolveHeroPalette(variant, isDark);
   // Dark mode: less lift so the pre-WebGL frame stays atmospheric
-  const lift = isDark ? 1.2 : 1.3;
+  const lift = isDark ? 1.08 : 1.3;
   const channel = (i: number): number => {
     const blended = base[i]! + 0.5 * (warm[i]! + mid[i]! + cool[i]!);
     return Math.round(Math.min(blended * lift, 1) * 255);

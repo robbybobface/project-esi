@@ -239,16 +239,16 @@ export const SHADER_VARIANTS: readonly ShaderVariant[] = [
       rgScale: rgb(1.0, 1.0, 1.0),
       brightness: 2.5,
     },
-    // Dark: gate navy field + vision yellow/cyan. Lifted a notch overall so the
-    // hero doesn't read as underexposed against the UI.
+    // Dark: password-gate navy + cyan wisps; hot yellow returns as screen accents.
+    // Quiet sage fleck (gate light #A5DCB4 family) via cool lift — not a green mid.
     heroDark: {
-      base: rgb(0.040, 0.130, 0.220),
-      warm: rgb(1.000, 0.950, 0.320),
-      mid: rgb(0.160, 0.480, 0.680),
-      cool: rgb(0.030, 0.100, 0.175),
-      cursor: rgb(0.120, 0.320, 0.450),
-      rgScale: rgb(0.96, 0.99, 1.14),
-      brightness: 1.52,
+      base: rgb(0.031, 0.141, 0.220),
+      warm: rgb(1.000, 0.900, 0.080),
+      mid: rgb(0.350, 0.750, 0.950),
+      cool: rgb(0.040, 0.220, 0.280),
+      cursor: rgb(0.350, 0.750, 0.950),
+      rgScale: rgb(1.02, 1.02, 1.10),
+      brightness: 1.4,
     },
     wave: [
       rgb(0.000, 0.280, 0.450),

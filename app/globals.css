@@ -84,6 +84,15 @@
 html {
   color-scheme: light;
   scroll-behavior: smooth;
+  /* Fallback when Lenis is off (reduced motion). Match the Lenis ANCHOR_OFFSET
+     intent: clear the fixed nav and the sections' top padding. */
+  scroll-padding-top: 1.5rem;
+}
+
+@media (max-width: 850px) {
+  html {
+    scroll-padding-top: 1.25rem;
+  }
 }
 
 html.dark {

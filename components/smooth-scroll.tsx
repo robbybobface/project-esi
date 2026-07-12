@@ -14,7 +14,19 @@ const LENIS_OPTIONS = {
   touchMultiplier: 2,
 };
 
-const ANCHOR_OFFSET = -100;
+// Positive = scroll past the section top into the content. Sections use
+// large py-* padding, so a negative "nav clearance" offset undershoots and
+// leaves you staring at empty padding / the previous section.
+const ANCHOR_OFFSET_DESKTOP = 48;
+// Mobile header + section padding is tighter — desktop offset overshoots
+const ANCHOR_OFFSET_MOBILE = 24;
+
+function anchorOffset(): number {
+  if (typeof window === "undefined") return ANCHOR_OFFSET_DESKTOP;
+  return window.matchMedia("(max-width: 850px)").matches
+    ? ANCHOR_OFFSET_MOBILE
+    : ANCHOR_OFFSET_DESKTOP;
+}
 
 export function SmoothScroll({ children }: { children: ReactNode }): ReactNode {
   useEffect(() => {
@@ -51,7 +63,7 @@ export function SmoothScroll({ children }: { children: ReactNode }): ReactNode {
       const element = document.querySelector(href);
       if (!element || !(element instanceof HTMLElement)) return;
       event.preventDefault();
-      lenis.scrollTo(element, { offset: ANCHOR_OFFSET });
+      lenis.scrollTo(element, { offset: anchorOffset() });
     }
 
     document.addEventListener("click", handleAnchorClick);

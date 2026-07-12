@@ -99,19 +99,43 @@ void main(){
   vec2 d3 = vec2( 0.09, -0.16) * t;
 
   float a = mix(m(uv + d1), mMobile(uv + d1), u_mobile);
-  // Slightly softer peaks on mobile so iso-lines don't etch over cell edges
-  float peakW = mix(u_peak * 1.35, u_peak * 1.15, u_mobile);
-  float peakM = mix(u_peak, max(u_peak * 0.9, 1.0), u_mobile);
-  float warmAmt = pow(clamp(a, 0.0, 1.0), max(peakW, 1.0)) * 1.75 * u_accent;
-  vec3 col = mix(u_pal_base, u_pal_warm, clamp(warmAmt, 0.0, 1.0));
-
   float b = mix(m(uv + a * 2.0 + d2), mMobile(uv + a * 2.0 + d2), u_mobile);
-  float midAmt = pow(clamp(b, 0.0, 1.0), max(peakM, 1.0)) * 1.25 * u_accent;
-  col = mix(col, u_pal_mid, clamp(midAmt, 0.0, 1.0));
-
   float dd = mix(m(uv + b * 2.8 + d3), mMobile(uv + b * 2.8 + d3), u_mobile);
-  float coolAmt = pow(clamp(dd, 0.0, 1.0), max(u_peak * 0.75, 1.0)) * u_accent;
-  col = mix(col, u_pal_cool, clamp(coolAmt, 0.0, 1.0));
+
+  vec3 col;
+  if (u_peak > 1.05) {
+    // Dark-only: peak gates + screen-blend (must not run in light mode)
+    // Warm peak softer than before — steep gate had wiped yellow entirely
+    float peakW = mix(u_peak * 1.2, u_peak * 1.1, u_mobile);
+    float peakM = mix(u_peak * 0.95, max(u_peak * 0.85, 1.0), u_mobile);
+    float warmRaw = pow(clamp(a, 0.0, 1.0), max(peakW, 1.0));
+    float warmAmt = smoothstep(0.12, 0.55, warmRaw) * 1.15 * u_accent;
+    warmAmt = clamp(warmAmt, 0.0, 1.0);
+
+    float midAmt = pow(clamp(b, 0.0, 1.0), max(peakM, 1.0)) * 1.25 * u_accent;
+    // Cyan yields where gold is strong (avoids olive mud), but not to zero
+    midAmt *= 1.0 - 0.75 * smoothstep(0.15, 0.7, warmAmt);
+    midAmt = clamp(midAmt, 0.0, 1.0);
+
+    float coolAmt = pow(clamp(dd, 0.0, 1.0), max(u_peak * 0.75, 1.0)) * u_accent;
+    coolAmt = clamp(coolAmt, 0.0, 1.0);
+
+    // Gate navy field + screen-blend cyan wisps, then gold
+    col = u_pal_base;
+    col = mix(col, u_pal_cool, coolAmt * 0.7);
+    vec3 wisp = u_pal_mid * midAmt;
+    col = 1.0 - (1.0 - col) * (1.0 - wisp);
+    vec3 gold = u_pal_warm * warmAmt;
+    col = 1.0 - (1.0 - col) * (1.0 - gold);
+  } else {
+    // Light: original soft matte mixes (unchanged look)
+    float warmAmt = clamp(a * 1.85 * u_accent, 0.0, 1.0);
+    float midAmt = clamp(b * 1.35 * u_accent, 0.0, 1.0);
+    float coolAmt = clamp(dd * u_accent, 0.0, 1.0);
+    col = mix(u_pal_base, u_pal_warm, warmAmt);
+    col = mix(col, u_pal_mid, midAmt);
+    col = mix(col, u_pal_cool, coolAmt);
+  }
 
   col += u_pal_cursor * fall * u_accent * u_cursorGain;
 

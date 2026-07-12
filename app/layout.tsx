@@ -1,5 +1,4 @@
 import { Providers } from "@/components/providers";
-import { ShaderVariantToggle } from "@/components/shader-variant-toggle";
 import { SkipToContent } from "@/components/skip-to-content";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { baseMetadata } from "@/lib/metadata";
@@ -71,7 +70,6 @@ export default async function RootLayout({
         <Providers initialTheme={initialTheme} themeExplicit={themeExplicit}>
           <SkipToContent />
           {children}
-          <ShaderVariantToggle />
           <ThemeSwitch />
         </Providers>
       </body>

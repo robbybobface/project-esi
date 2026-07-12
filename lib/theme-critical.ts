@@ -1,5 +1,7 @@
-/** Inline script — runs before paint to match cookie or system preference. */
-export const THEME_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )theme=(dark|light)(?:;|$)/);var t=m?m[1]:null;if(!t){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}var r=document.documentElement;if(t==="dark"){r.classList.add("dark");r.style.colorScheme="dark";r.style.backgroundColor="#0a0a0a";}else{r.classList.remove("dark");r.style.colorScheme="light";r.style.backgroundColor="#ffffff";}try{localStorage.setItem("theme",t);}catch(e){}}catch(e){}})();`;
+/** Inline script — runs before paint to match cookie or system preference.
+ *  Only persist light/dark to localStorage when the theme cookie is set
+ *  (explicit choice). Otherwise store "system" so next-themes tracks OS. */
+export const THEME_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )theme=(dark|light)(?:;|$)/);var explicit=!!m;var t=m?m[1]:null;if(!t){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}var r=document.documentElement;if(t==="dark"){r.classList.add("dark");r.style.colorScheme="dark";r.style.backgroundColor="#0a0a0a";}else{r.classList.remove("dark");r.style.colorScheme="light";r.style.backgroundColor="#ffffff";}try{localStorage.setItem("theme",explicit?t:"system");}catch(e){}}catch(e){}})();`;
 
 /** Critical CSS so the first frame has the right colors before Tailwind loads.
  *  Gate gradients are CSS backgrounds (not <img>) so the wrong theme asset

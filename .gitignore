@@ -46,5 +46,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local scripts
-/scripts
+# local scripts (keep committed tooling)
+/scripts/*
+!/scripts/embed-og-assets.cjs

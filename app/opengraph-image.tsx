@@ -1,3 +1,4 @@
+import { OG_BG_DATA_URL, OG_LOGO_DATA_URL } from "@/lib/og-embedded-assets";
 import { ImageResponse } from "next/og";
 
 // Generated Open Graph card served at /opengraph-image
@@ -13,24 +14,10 @@ const TRAPEZOID_SKEW_DEG = (Math.atan(59 / 230) * 180) / Math.PI;
 const LOGO_HEIGHT = 76;
 const LOGO_WIDTH = Math.round(LOGO_HEIGHT * (487 / 230));
 
-async function assetDataUrl(assetUrl: URL, mime: string): Promise<string> {
-  // Bundler-resolved URL — Workers have no public/ filesystem at runtime
-  const res = await fetch(assetUrl);
-  if (!res.ok) {
-    throw new Error(`Failed to load OG asset: ${assetUrl.pathname}`);
-  }
-  const buf = Buffer.from(await res.arrayBuffer());
-  return `data:${mime};base64,${buf.toString("base64")}`;
-}
-
-export default async function OpengraphImage(): Promise<ImageResponse> {
-  const [bgSrc, logoSrc] = await Promise.all([
-    assetDataUrl(new URL("../public/og-bg.jpg", import.meta.url), "image/jpeg"),
-    assetDataUrl(
-      new URL("../public/esi_logo.svg", import.meta.url),
-      "image/svg+xml",
-    ),
-  ]);
+export default function OpengraphImage(): ImageResponse {
+  // Data URLs are embedded at build time — no fs/fetch (Workers + Turbopack safe)
+  const bgSrc = OG_BG_DATA_URL;
+  const logoSrc = OG_LOGO_DATA_URL;
 
   return new ImageResponse(
     <div

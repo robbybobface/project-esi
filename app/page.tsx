@@ -1,38 +1,40 @@
-import { Faq } from "@/components/faq";
+import { Brands } from "@/components/brands";
+import { Ecosystem } from "@/components/ecosystem";
 import { FinalCta } from "@/components/final-cta";
 import { Footer } from "@/components/footer";
+import { Heritage } from "@/components/heritage";
 import { Hero } from "@/components/hero";
-import { Partners } from "@/components/partners";
-import { Pillars } from "@/components/pillars";
-import { Pricing } from "@/components/pricing";
-import { Product } from "@/components/product";
+import { Partnerships } from "@/components/partnerships";
+import { Preloader } from "@/components/preloader";
 import { StructuredData } from "@/components/structured-data";
-import { ValueProp } from "@/components/value-prop";
+import { Team } from "@/components/team";
+import { Vision } from "@/components/vision";
 import { createMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = createMetadata({
   description:
-    "The all-in-one platform for product teams to design, deploy, and scale software products faster than ever. Plan, build, and ship from one workspace.",
+    "Epicurean Spirits International (ESI) — a global experiences and hospitality company built on heritage. La Gran Señora Tequila, Moon LIT Cove rum, and world-class hospitality since 1860.",
   path: "/",
 });
 
 export default function HomePage(): ReactNode {
   return (
     <>
+      <Preloader />
       <StructuredData />
       <main
         id="main-content"
         className="relative z-10 flex-1 bg-background"
       >
         <Hero />
-        <ValueProp />
-        <Product />
-        <Pillars />
-        <Partners />
-        <Pricing />
-        <Faq />
+        <Vision />
+        <Ecosystem />
+        <Partnerships />
+        <Brands />
+        <Heritage />
+        <Team />
         <FinalCta />
       </main>
       <Footer />

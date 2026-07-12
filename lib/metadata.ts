@@ -1,30 +1,32 @@
 import type { Metadata } from "next";
 
 export const siteConfig = {
-  name: "Lumen",
-  shortDescription: "Build what matters, ship without limits.",
+  name: "ESI",
+  shortDescription: "Heritage built. Hospitality driven. Global ready.",
   description:
-    "Lumen is the all-in-one platform for product teams to design, deploy, and scale software. Plan, build, and ship from a single surface with real-time collaboration, branch previews, and integrations for GitHub, Slack, and Linear.",
-  url: "https://example.com",
-  ogImage: "/og-image.png",
-  creator: "@lumen",
+    "Epicurean Spirits International (ESI) is a global experiences and hospitality company built on heritage. In partnership with the Camarena Familia and the Cuello family, ESI brings La Gran Señora Tequila, Moon LIT Cove rum, and world-class hospitality to markets worldwide.",
+  url: "https://esicorp.global",
+  // Served by the app/opengraph-image.tsx file convention
+  ogImage: "/opengraph-image",
+  contactEmail: "contact@esicorp.global",
+  creator: "@esicorp",
   authors: [
     {
-      name: "Lumen",
-      url: "https://example.com",
+      name: "Epicurean Spirits International",
+      url: "https://esicorp.global",
     },
   ],
   keywords: [
-    "Lumen",
-    "developer platform",
-    "product platform",
-    "ship software",
-    "branch previews",
-    "real-time collaboration",
-    "deployment platform",
-    "SaaS landing page",
-    "Next.js",
-    "React",
+    "ESI",
+    "Epicurean Spirits International",
+    "La Gran Señora",
+    "tequila",
+    "premium rum",
+    "Moon LIT Cove",
+    "Camarena Familia",
+    "hospitality",
+    "luxury spirits",
+    "global experiences brand",
   ],
 } as const;
 
@@ -88,7 +90,7 @@ export const baseMetadata: Metadata = {
       { url: "/favicon.ico", sizes: "any" },
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    apple: "/apple-icon.svg",
+    apple: "/apple-icon.png",
   },
   manifest: "/site.webmanifest",
 };

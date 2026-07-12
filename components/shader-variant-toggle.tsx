@@ -7,7 +7,6 @@ import { Palette } from "lucide-react";
 import {
   useCallback,
   useEffect,
-  useId,
   useRef,
   useState,
   type ReactNode,
@@ -20,7 +19,6 @@ export function ShaderVariantToggle(): ReactNode {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
-  const labelId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -78,7 +76,7 @@ export function ShaderVariantToggle(): ReactNode {
           <motion.div
             ref={popoverRef}
             role="dialog"
-            aria-labelledby={labelId}
+            aria-label="Choose shader color variant"
             initial={{ opacity: 0, y: 8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}

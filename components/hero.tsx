@@ -8,21 +8,37 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ArrowChip } from "@/components/arrow-chip";
+import { useIntro } from "@/components/intro-provider";
 import { ShaderCanvas } from "@/components/shader-canvas";
 import { Nav } from "@/components/nav";
+import { useShaderVariant } from "@/components/shader-variant-context";
+import { heroPlaceholderColor } from "@/lib/shader-variants";
 
 const easeOutExpo = [0.33, 1, 0.68, 1] as const;
 
 const START_W = 110;
 const START_H = 60;
 const FINAL_RADIUS = 24;
-const FRAME_INSET = 10; 
+const FRAME_INSET = 10;
 
 const SCROLL_RANGE = 80;
 
 export function Hero(): ReactNode {
+  const { variant } = useShaderVariant();
+  const { ready: introReady } = useIntro();
+
+  // Failsafe if the preloader never signals — never leave the tiny center pill
+  const [failsafeReady, setFailsafeReady] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setFailsafeReady(true), 3500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  // The entrance waits for the preloader, so the expansion appears to grow
+  // out from where the progress bar completed
+  const started = introReady || failsafeReady;
 
   const progress = useMotionValue(0);
 
@@ -41,11 +57,11 @@ export function Hero(): ReactNode {
 
   const width = useTransform(
     progress,
-    (p) => `calc(${START_W}px + (100% - ${START_W}px) * ${p})`,
+    (p) => `calc(${START_W}px + (100% - ${START_W}px) * ${p})`
   );
   const height = useTransform(
     progress,
-    (p) => `calc(${START_H}px + (100% - ${START_H}px) * ${p})`,
+    (p) => `calc(${START_H}px + (100% - ${START_H}px) * ${p})`
   );
 
   const borderRadius = useTransform([progress, exit], (latest) => {
@@ -66,97 +82,115 @@ export function Hero(): ReactNode {
   });
 
   useEffect(() => {
+    if (!started) return;
     const controls = animate(progress, 1, {
       duration: 1.8,
       ease: easeOutExpo,
     });
     return () => controls.stop();
-  }, [progress]);
+  }, [progress, started]);
 
   return (
     <>
-      <Nav delay={1.3} />
+      <Nav delay={1.1} active={started} />
 
-      <motion.section
-        className="relative w-full h-screen"
-        style={{ padding }}
-      >
-      <div className="relative w-full h-full flex items-center justify-center">
-        <motion.div
-          className="relative overflow-hidden bg-[#3a1818]"
-          style={{ width, height, borderRadius }}
-        >
-          <div aria-hidden="true" className="absolute inset-0 w-full h-full">
-            <ShaderCanvas />
-          </div>
-
+      <motion.section className="relative h-screen w-full" style={{ padding }}>
+        <div className="relative flex h-full w-full items-center justify-center">
           <motion.div
-            className="absolute inset-0 flex flex-col justify-between p-10 pt-40 max-[850px]:p-6 max-[850px]:pt-32 text-white pointer-events-none max-w-[1680px] mx-auto"
-            initial="hidden"
-            animate="visible"
-            transition={{ staggerChildren: 0.12, delayChildren: 1.4 }}
+            className="relative overflow-hidden"
+            style={{
+              width,
+              height,
+              borderRadius,
+              // Matches the shader palette so the pre-WebGL frame isn't a color mismatch
+              backgroundColor: heroPlaceholderColor(variant),
+            }}
           >
-            <motion.h1
-              className="max-w-[18ch] text-[clamp(2.75rem,7.75vw,7.75rem)] font-medium leading-[0.95] tracking-tight"
-              variants={{
-                hidden: {},
-                visible: {},
-              }}
-              transition={{ staggerChildren: 0.12 }}
-            >
-              {["Build what matters,", "ship without limits."].map((line) => (
-                <span
-                  key={line}
-                  className="block overflow-hidden pb-[0.05em]"
-                >
-                  <motion.span
-                    className="block will-change-transform"
-                    variants={{
-                      hidden: { y: "110%" },
-                      visible: { y: "0%" },
-                    }}
-                    transition={{ duration: 1, ease: easeOutExpo }}
-                  >
-                    {line}
-                  </motion.span>
-                </span>
-              ))}
-            </motion.h1>
-
-            <div className="flex items-end justify-between gap-8 max-[850px]:flex-col max-[850px]:items-start">
-              <motion.p
-                className="max-w-xl text-2xl font-medium leading-snug tracking-tight text-white/90"
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-                transition={{ duration: 0.8, ease: easeOutExpo }}
-              >
-                The all-in-one platform for modern teams to design, deploy,
-                and scale software products faster than ever.
-              </motion.p>
-
-              <motion.button
-                type="button"
-                className="group pointer-events-auto inline-flex items-stretch gap-1 cursor-pointer"
-                variants={{
-                  hidden: { opacity: 0, y: 16 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-                transition={{ duration: 0.8, ease: easeOutExpo }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="px-5 py-3 rounded-md bg-white text-neutral-900 text-xs font-medium tracking-widest uppercase border border-neutral-900/[0.08]">
-                  Explore the Platform
-                </span>
-                <ArrowChip className="bg-accent text-accent-foreground" />
-              </motion.button>
+            <div aria-hidden="true" className="absolute inset-0 h-full w-full">
+              <ShaderCanvas />
             </div>
+
+            <motion.div
+              className="pointer-events-none absolute inset-0 mx-auto flex max-w-[1680px] flex-col justify-between p-10 pt-40 text-white max-[850px]:p-6 max-[850px]:pt-44"
+              initial="hidden"
+              animate={started ? "visible" : "hidden"}
+              transition={{ staggerChildren: 0.12, delayChildren: 1.4 }}
+            >
+              <motion.h1
+                className="font-display flex max-w-[18ch] flex-col text-[clamp(2.75rem,7.75vw,7.75rem)] leading-[0.95] font-medium tracking-tight max-[850px]:gap-1"
+                // Articulat CF Heavy is a separate Typekit family served at weight 900
+                style={{
+                  fontFamily:
+                    '"articulat-heavy-cf", var(--font-display-family)',
+                  fontWeight: 900,
+                }}
+                variants={{
+                  hidden: {},
+                  visible: {},
+                }}
+                transition={{ staggerChildren: 0.12 }}
+              >
+                {["Heritage built", "Hospitality driven", "Global ready"].map(
+                  (line) => (
+                    <span
+                      key={line}
+                      // Room for descenders inside the reveal mask; the negative
+                      // margin keeps the tight leading intact
+                      className="-mb-[0.22em] block overflow-hidden pb-[0.22em]"
+                    >
+                      <motion.span
+                        className="block will-change-transform"
+                        variants={{
+                          // 140% (not 110%) so the hidden line fully clears the
+                          // mask, which extends 0.22em below for descender room
+                          hidden: { y: "140%" },
+                          visible: { y: "0%" },
+                        }}
+                        transition={{ duration: 1, ease: easeOutExpo }}
+                      >
+                        {line}
+                      </motion.span>
+                    </span>
+                  )
+                )}
+              </motion.h1>
+
+              <div className="flex items-end justify-between gap-8 max-[850px]:flex-col max-[850px]:items-start">
+                <motion.p
+                  className="max-w-xl text-2xl leading-snug font-medium tracking-tight text-white/90 max-[850px]:text-lg"
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.8, ease: easeOutExpo }}
+                >
+                  Since 1860, our families have perfected tequila and rum.
+                  Today, ESI carries that craft to the world through
+                  unforgettable hospitality.
+                </motion.p>
+
+                <motion.a
+                  href="#vision"
+                  aria-label="Learn more about ESI"
+                  className="group pointer-events-auto inline-flex cursor-pointer items-stretch gap-1"
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.8, ease: easeOutExpo }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="rounded-md border border-neutral-900/[0.08] bg-white px-5 py-3 text-xs font-medium tracking-widest text-neutral-900 uppercase">
+                    Learn More
+                  </span>
+                  <ArrowChip className="bg-accent text-accent-foreground" />
+                </motion.a>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </div>
-    </motion.section>
+        </div>
+      </motion.section>
     </>
   );
 }

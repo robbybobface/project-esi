@@ -17,7 +17,11 @@ export function ThemeSwitch(): ReactNode {
   const { setTheme, resolvedTheme } = useTheme();
 
   const toggleTheme = (): void => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(next);
+    // Mirror the preference in a cookie so the server renders the right
+    // theme on the next request (see app/layout.tsx)
+    document.cookie = `theme=${next}; path=/; max-age=31536000; SameSite=Lax`;
   };
 
   if (!mounted) {

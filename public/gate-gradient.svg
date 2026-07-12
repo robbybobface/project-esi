@@ -1,0 +1,21 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#gate_clip)">
+<g filter="url(#gate_blur)">
+<ellipse cx="960" cy="130" rx="1635.97" ry="556.168" fill="#F4E68C"/>
+<ellipse cx="1000" cy="45" rx="1635.97" ry="556.168" fill="#A5DCB4"/>
+<ellipse cx="930" cy="-45" rx="1635.97" ry="556.168" fill="#6FD0F2"/>
+<ellipse cx="985" cy="-140" rx="1635.97" ry="556.168" fill="#35A0E0"/>
+<ellipse cx="960" cy="-240" rx="1635.97" ry="556.168" fill="#0F6BA8"/>
+</g>
+</g>
+<defs>
+<filter id="gate_blur" x="-925.968" y="-1049.1" width="3799.39" height="1918.21" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="125" result="effect1_foregroundBlur"/>
+</filter>
+<clipPath id="gate_clip">
+<rect width="1920" height="1080" fill="white"/>
+</clipPath>
+</defs>
+</svg>

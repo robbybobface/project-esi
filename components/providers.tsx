@@ -1,5 +1,6 @@
 "use client";
 
+import { IntroProvider } from "@/components/intro-provider";
 import { ShaderVariantProvider } from "@/components/shader-variant-context";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { ReducedMotionProvider } from "@/lib/motion";
@@ -7,18 +8,30 @@ import { MotionConfig } from "motion/react";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 
-export function Providers({ children }: { children: ReactNode }): ReactNode {
+export function Providers({
+  children,
+  initialTheme,
+  themeExplicit,
+}: {
+  children: ReactNode;
+  initialTheme: "light" | "dark";
+  themeExplicit: boolean;
+}): ReactNode {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme={themeExplicit ? initialTheme : "system"}
+      // Pin hydration to the cookie when the user chose a theme explicitly
+      enableSystem={!themeExplicit}
+      storageKey="theme"
       disableTransitionOnChange
     >
       <ReducedMotionProvider>
         <MotionConfig reducedMotion="user">
           <ShaderVariantProvider>
-            <SmoothScroll>{children}</SmoothScroll>
+            <IntroProvider>
+              <SmoothScroll>{children}</SmoothScroll>
+            </IntroProvider>
           </ShaderVariantProvider>
         </MotionConfig>
       </ReducedMotionProvider>

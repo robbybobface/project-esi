@@ -120,9 +120,9 @@ export function Faq(): ReactNode {
             <RevealHeadline
               id="faq-heading"
               delay={0.05}
-              className="text-balance text-[clamp(2rem,4.2vw,4rem)] font-medium leading-[0.85] tracking-tight"
+              className="text-balance text-[clamp(2rem,4.2vw,4rem)] font-medium leading-[1.02] tracking-tight"
             >
-              The questions teams ask before switching to Lumen.
+              The questions people ask about ESI.
             </RevealHeadline>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
@@ -130,8 +130,9 @@ export function Faq(): ReactNode {
               transition={{ duration: 0.7, ease: easeOutExpo, delay: 0.18 }}
               className="mt-6 max-w-[60ch] text-balance text-xl max-[850px]:text-lg font-light leading-snug text-foreground/60"
             >
-              Short answers to the things that come up in every procurement
-              call. If you need more, our team replies in hours, not days.
+              Short answers about our brands, our partners, and where the
+              company is headed. If you need more, reach out — we&rsquo;d love
+              to talk.
             </motion.p>
           </div>
         </div>

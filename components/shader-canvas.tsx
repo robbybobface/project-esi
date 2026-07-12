@@ -168,17 +168,41 @@ export function ShaderCanvas({ className }: Props): ReactNode {
     let resizePending = 0;
     let lastW = 0;
     let lastH = 0;
-    const resize = () => {
+    let currentDpr = 0;
+    // During continuous resizes (hero entrance/exit animations) the box is
+    // tracked every frame so the gradient reflows fluidly — but at reduced
+    // resolution, so the per-frame GL buffer reallocation stays cheap. Once
+    // the box stops moving, a trailing settle pass re-renders at full
+    // resolution. A soft gradient hides the momentary resolution drop.
+    const MOTION_DPR = Math.min(dpr, 0.5);
+    const SETTLE_MS = 150;
+    let lastResizeEvent = 0;
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const applySize = (targetDpr: number) => {
       const rect = host.getBoundingClientRect();
       const w = Math.max(1, Math.round(rect.width));
       const h = Math.max(1, Math.round(rect.height));
-      if (w === lastW && h === lastH) return;
+      if (w === lastW && h === lastH && targetDpr === currentDpr) return;
       lastW = w;
       lastH = h;
+      currentDpr = targetDpr;
+      renderer.dpr = targetDpr;
       renderer.setSize(w, h);
       program.uniforms.r.value[0] = gl.canvas.width;
       program.uniforms.r.value[1] = gl.canvas.height;
       renderer.render({ scene: mesh });
+    };
+
+    const resize = () => {
+      const now = performance.now();
+      // Consecutive events within the settle window mean an animation is
+      // driving the box size — drop to the cheap motion resolution
+      const rapid = now - lastResizeEvent < SETTLE_MS;
+      lastResizeEvent = now;
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => applySize(dpr), SETTLE_MS);
+      applySize(rapid ? MOTION_DPR : dpr);
     };
     const queueResize = () => {
       if (resizePending) return;
@@ -187,7 +211,7 @@ export function ShaderCanvas({ className }: Props): ReactNode {
         resize();
       });
     };
-    resize();
+    applySize(dpr);
 
     const ro = new ResizeObserver(queueResize);
     ro.observe(host);
@@ -285,6 +309,7 @@ export function ShaderCanvas({ className }: Props): ReactNode {
     return () => {
       cancelAnimationFrame(raf);
       cancelAnimationFrame(resizePending);
+      clearTimeout(settleTimer);
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerleave", onLeave);

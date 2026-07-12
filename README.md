@@ -19,18 +19,19 @@ A premium Next.js 16+ landing page template built around a signature WebGL palet
 
 ## Sections Included
 
-- **Nav** — Sticky top bar with locked dark CTA, mobile menu, theme switch, palette switch
+- **Nav** — Sticky top bar with ESI logo lockup, Contact CTA, mobile menu, theme switch, palette switch
 - **Hero** — Full-bleed palette shader with cursor-reactive flow and word-mask headline reveal
-- **Value Prop** — Scroll-pinned 3-step narrative backed by a synced wave shader
-- **Product** — Full-bleed 3-tile band with mono indices and hairline rails
-- **Pillars** — Three-up benefit grid with rolling-arrow card hovers
-- **Partners** — Trust strip with logo wall
-- **Pricing** — Two tiers (Pro / Enterprise) with featured-card emphasis
-- **FAQ** — Accessible accordion with whole-row activation and `+→×` rotate icon
-- **Final CTA** — Rounded card with embedded shader, hero-style headline, white CTA
-- **Footer** — Reveal-from-below sticky footer (desktop) with link columns
+- **Vision** (`vision.tsx`) — Scroll-pinned 3-step brand philosophy backed by a synced wave shader
+- **Ecosystem** (`ecosystem.tsx`) — Six-tile La Gran Señora ecosystem band with mono indices
+- **Partnerships** (`partnerships.tsx`) — Three-up cards: Camarena, Cuello, ESI
+- **Brands** (`brands.tsx`) — Interactive brand selector with featured panel and logo tiles
+- **Heritage** (`heritage.tsx`) — Two family legacy cards with milestone lists
+- **Team** (`team.tsx`) — Auto-scrolling, looping team carousel
+- **FAQ** — Accessible accordion (currently not rendered on the page)
+- **Final CTA** — Rounded card with embedded shader, hero-style headline, Contact CTA
+- **Footer** — Reveal-from-below sticky footer (desktop) with gradient statement and link columns
 - **Theme Switch** — Sun/Moon toggle, hydration-safe
-- **Palette Switch** — Cycle through five named shader variants
+- **Palette Switch** — Cycle through named shader variants
 
 ## Getting Started
 
@@ -117,9 +118,9 @@ The default `siteConfig.url` is `https://example.com` — replace it with your p
 
 ### 2. Update Brand & FAQ Copy
 
-- Brand wordmark `Lumen` lives in `components/nav.tsx` and `components/footer.tsx` — search for `Lumen` to update both.
-- FAQ items live in `lib/faq-data.ts`. They are consumed by both the visible FAQ accordion and the `FAQPage` JSON-LD block — edit once, both update.
-- Pricing tiers and offers live in `components/pricing.tsx` and the `SoftwareApplication` JSON-LD inside `components/structured-data.tsx`. Keep them in sync.
+- The ESI logo lockup lives in `components/nav.tsx` and `components/footer.tsx` (SVGs in `public/`).
+- FAQ items live in `lib/faq-data.ts` (the FAQ section is currently not rendered on the page).
+- Heritage timeline copy lives in `components/heritage.tsx`; brand data (logos, blurbs, links) in `components/brands.tsx`.
 
 ### 3. Replace Icons
 

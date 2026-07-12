@@ -1,11 +1,11 @@
 {
-  "name": "Your Site Name",
-  "short_name": "Site",
-  "description": "A modern, accessible landing page template built with Next.js, Tailwind CSS, and TypeScript.",
+  "name": "Epicurean Spirits International",
+  "short_name": "ESI",
+  "description": "A global experiences and hospitality company built on heritage — La Gran Señora Tequila, Moon LIT Cove rum, and world-class hospitality since 1860.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0066FF",
+  "theme_color": "#0a0a0a",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -16,12 +16,6 @@
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
-    },
-    {
-      "src": "/icon-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }

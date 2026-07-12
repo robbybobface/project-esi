@@ -88,8 +88,9 @@ export function ArrowChip({
   return (
     <span
       className={[
-
-        "relative inline-flex h-full items-center justify-center rounded-md overflow-hidden",
+        // self-stretch (not h-full) so the chip matches the height of its
+        // sibling label inside the parent's items-stretch flex row
+        "relative inline-flex self-stretch items-center justify-center rounded-md overflow-hidden",
         padX,
         padY,
         className,

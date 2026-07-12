@@ -2,7 +2,6 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { RollingArrow } from "@/components/arrow-chip";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, type ReactNode } from "react";
 import { WaveShader, type WaveParams, type WaveShaderHandle } from "./wave-shader";
@@ -14,16 +13,16 @@ interface Step {
 
 const STEPS: Step[] = [
   {
-    eyebrow: "The problem",
-    body: "Modern teams ship slower than they think. Tooling fragments, context evaporates, and momentum dies between handoffs.",
+    eyebrow: "The vision",
+    body: "Build the world's best premium tequila, then grow a house of luxury brands around it — patiently, and without compromise.",
   },
   {
-    eyebrow: "The approach",
-    body: "Lumen unifies design, deployment, and observability into one system, so the work flows in a single, continuous direction.",
+    eyebrow: "Authenticity, with discipline",
+    body: "Real tequila-making lineage, not marketing narratives — protected by controlled distribution, premium pricing, and selective market entry.",
   },
   {
-    eyebrow: "The outcome",
-    body: "You stop managing tools and start compounding output. Every release sharper, every iteration faster, every decision clearer.",
+    eyebrow: "Culture over endorsement",
+    body: "La Gran Señora lives across food, nightlife, and hospitality. Celebrity may amplify the brand — its credibility never depends on it.",
   },
 ];
 
@@ -70,7 +69,7 @@ const STEP_PRESETS: WaveParams[] = [
   },
 ];
 
-export function ValueProp(): ReactNode {
+export function Vision(): ReactNode {
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -200,8 +199,9 @@ export function ValueProp(): ReactNode {
   return (
     <section
       ref={sectionRef}
+      id="vision"
       className="relative bg-background text-foreground"
-      aria-label="Value proposition"
+      aria-label="Vision and brand philosophy"
     >
       <div
         ref={pinRef}
@@ -220,16 +220,10 @@ export function ValueProp(): ReactNode {
         </div>
 
         <div className="absolute inset-x-0 top-0 z-10 px-10 max-[850px]:px-6 pt-28 max-[850px]:pt-24 max-w-[1680px] mx-auto flex items-end justify-between gap-8">
-          <h2 className="max-w-[22ch] text-[clamp(1.5rem,2.4vw,2.25rem)] font-medium leading-[1.15] tracking-tight text-foreground/80">
-            A platform built for teams who&rsquo;d rather ship than orchestrate.
+          <h2 className="font-subhead max-w-[22ch] text-[clamp(1.5rem,2.4vw,2.25rem)] font-bold leading-[1.15] tracking-tight text-foreground/80">
+            A spirits brand built with the patience and conviction to be
+            the world&rsquo;s best.
           </h2>
-          <a
-            href="#"
-            className="group hidden max-[850px]:hidden min-[851px]:inline-flex items-center gap-2 rounded-md border border-foreground/[0.08] px-4 py-2.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:border-foreground/[0.16] transition-colors whitespace-nowrap shrink-0"
-          >
-            Learn more
-            <RollingArrow iconSize={16} />
-          </a>
         </div>
 
         <div className="absolute inset-0 z-10 px-10 max-[850px]:px-6 pt-72 max-[850px]:pt-60 pb-16 max-w-[1680px] mx-auto pointer-events-none">
@@ -254,7 +248,7 @@ export function ValueProp(): ReactNode {
                   </p>
                 </div>
 
-                <p className="col-span-9 max-[850px]:col-span-1 text-[clamp(2rem,4.2vw,4rem)] font-medium leading-[1.1] tracking-tight">
+                <p className="font-display col-span-9 max-[850px]:col-span-1 text-[clamp(2rem,4.2vw,4rem)] font-medium leading-[1.1] tracking-tight">
                   {step.body.split(" ").map((word, wi) => (
                     <span key={wi}>
                       <span

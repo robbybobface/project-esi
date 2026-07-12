@@ -1,3 +1,6 @@
+/* Adobe Fonts (Typekit) kit — must precede all other rules */
+@import url("https://use.typekit.net/dnn7fhk.css");
+
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -16,8 +19,22 @@
   --accent: #0a0a0a;
   
   --accent-foreground: #ffffff;
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Font groups — swap a family here to retheme that group site-wide.
+     Adobe Fonts kit is loaded in app/layout.tsx; drop Typekit family names
+     into these stacks to test them. */
+
+  /* Display: hero, section headlines, big statements */
+  --font-display-family: "articulat-cf", var(--font-geist-sans), system-ui, sans-serif;
+  --font-display-weight: 700;
+  /* Body: default text, paragraphs, cards, UI */
+  --font-body-family: "soleil", var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-body-weight: 300;
+  /* Subheads: card and panel titles (brand names, legacy cards) */
+  --font-subhead-family: "mendl-sans-dusk", var(--font-display-family);
+  --font-subhead-weight: 700;
+  /* Label: eyebrows, tags, counters, nav-adjacent microtype */
+  --font-mono-family: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 .dark {
@@ -58,8 +75,10 @@
   --color-neutral-800: #262626;
   --color-neutral-900: #171717;
   --color-neutral-950: #0a0a0a;
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+  --font-sans: var(--font-body-family);
+  --font-mono: var(--font-mono-family);
+  --font-display: var(--font-display-family);
+  --font-subhead: var(--font-subhead-family);
 }
 
 html {
@@ -84,9 +103,48 @@ html.dark {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-body-family);
+  /* Soleil Light as the default body weight */
+  font-weight: var(--font-body-weight);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display type is always bold Articulat — unlayered so it wins over
+   the font-medium utility the headline markup carries */
+.font-display {
+  font-weight: var(--font-display-weight);
+}
+
+/* Subhead type is always bold Mendl Sans Dusk, same override trick */
+.font-subhead {
+  font-weight: var(--font-subhead-weight);
+}
+
+/* Gradient-clipped accent words: the gradient itself comes from an inline
+   background-image (derived from the active shader palette); this class
+   handles the clip and the slow sweep. Reduced-motion users get it static. */
+.text-shimmer {
+  /* background-clip: text only paints gradient inside the element's box —
+     pad the box outward (margins cancel the layout shift) so glyphs that
+     overhang their advance width (tight tracking, descenders) stay filled */
+  display: inline-block;
+  padding: 0.1em 0.18em 0.22em;
+  margin: -0.1em -0.18em -0.22em;
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-shimmer 6s linear infinite;
+}
+
+@keyframes text-shimmer {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .skip-to-content {

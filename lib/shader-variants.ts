@@ -170,6 +170,94 @@ export const SHADER_VARIANTS: readonly ShaderVariant[] = [
       rgb(0.080, 0.420, 0.300), 
     ],
   },
+  {
+    id: "ocean",
+    label: "Ocean",
+    description: "Ink, teal, and sea mist",
+    swatch: "#598392",
+    hero: {
+      base: rgb(0.004, 0.086, 0.118),
+      warm: rgb(0.055, 0.220, 0.300),
+      mid: rgb(0.080, 0.320, 0.380),
+      cool: rgb(0.030, 0.140, 0.160),
+      cursor: rgb(0.004, 0.055, 0.080),
+      rgScale: rgb(1.0, 1.0, 1.0),
+      brightness: 2.5,
+    },
+    wave: [
+      rgb(0.020, 0.100, 0.140),
+      rgb(0.070, 0.270, 0.350),
+      rgb(0.150, 0.420, 0.520),
+      rgb(0.200, 0.520, 0.550),
+      rgb(0.280, 0.580, 0.520),
+    ],
+  },
+  {
+    id: "earth",
+    label: "Earth",
+    description: "Sage, slate, and stone",
+    swatch: "#84a98c",
+    hero: {
+      base: rgb(0.120, 0.160, 0.180),
+      warm: rgb(0.200, 0.350, 0.320),
+      mid: rgb(0.250, 0.420, 0.360),
+      cool: rgb(0.100, 0.200, 0.220),
+      cursor: rgb(0.060, 0.100, 0.120),
+      rgScale: rgb(1.0, 1.0, 1.0),
+      brightness: 2.5,
+    },
+    wave: [
+      rgb(0.120, 0.160, 0.180),
+      rgb(0.180, 0.300, 0.280),
+      rgb(0.280, 0.450, 0.400),
+      rgb(0.420, 0.580, 0.490),
+      rgb(0.520, 0.680, 0.580),
+    ],
+  },
+  {
+    id: "sunshine",
+    label: "Sunshine",
+    description: "Gold, sky blue, and Baltic",
+    swatch: "#ffd200",
+    hero: {
+      base: rgb(0.000, 0.100, 0.180),
+      warm: rgb(0.520, 0.400, 0.000),
+      mid: rgb(0.100, 0.380, 0.480),
+      cool: rgb(0.000, 0.220, 0.380),
+      cursor: rgb(0.040, 0.060, 0.100),
+      rgScale: rgb(1.0, 1.0, 1.0),
+      brightness: 2.5,
+    },
+    wave: [
+      rgb(0.000, 0.280, 0.450),
+      rgb(0.150, 0.500, 0.700),
+      rgb(0.400, 0.720, 0.920),
+      rgb(0.950, 0.780, 0.080),
+      rgb(1.000, 0.880, 0.280),
+    ],
+  },
+  {
+    id: "lemonade",
+    label: "Lemonade",
+    description: "Citrus gold, wheat, and sage",
+    swatch: "#fbcf3b",
+    hero: {
+      base: rgb(0.140, 0.200, 0.160),
+      warm: rgb(0.380, 0.300, 0.060),
+      mid: rgb(0.420, 0.360, 0.200),
+      cool: rgb(0.180, 0.280, 0.220),
+      cursor: rgb(0.080, 0.120, 0.100),
+      rgScale: rgb(1.0, 1.0, 1.0),
+      brightness: 2.5,
+    },
+    wave: [
+      rgb(0.220, 0.320, 0.260),
+      rgb(0.420, 0.550, 0.420),
+      rgb(0.720, 0.580, 0.150),
+      rgb(0.920, 0.780, 0.280),
+      rgb(0.880, 0.720, 0.420),
+    ],
+  },
 ] as const;
 
 const VARIANT_MAP: Map<string, ShaderVariant> = new Map(
@@ -179,6 +267,36 @@ const VARIANT_MAP: Map<string, ShaderVariant> = new Map(
 export function getVariantById(id: string | undefined): ShaderVariant {
   if (id && VARIANT_MAP.has(id)) return VARIANT_MAP.get(id)!;
   return SHADER_VARIANTS[0]!;
+}
+
+// Shader palette color → CSS rgb() string
+export function rgbToCss([r, g, b]: RGB): string {
+  return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
+}
+
+// The variant's five wave colors as CSS strings
+export function waveStopsCss(variant: ShaderVariant): string[] {
+  return variant.wave.map(rgbToCss);
+}
+
+// Text-accent gradient built from the wave palette, mirrored so a sweeping
+// background-position animation loops seamlessly
+export function waveAccentGradient(variant: ShaderVariant): string {
+  const stops = waveStopsCss(variant);
+  return `linear-gradient(100deg, ${[...stops, ...[...stops].reverse()].join(", ")})`;
+}
+
+// CSS color for the placeholder shown behind the hero/CTA shader before
+// WebGL paints its first frame. The rendered gradient is a bright blend of
+// the palette's warm/mid/cool colors over the base, so approximate that
+// blend rather than using the (much darker) base color alone.
+export function heroPlaceholderColor(variant: ShaderVariant): string {
+  const { base, warm, mid, cool } = variant.hero;
+  const channel = (i: number): number => {
+    const blended = base[i]! + 0.5 * (warm[i]! + mid[i]! + cool[i]!);
+    return Math.round(Math.min(blended * 1.3, 1) * 255);
+  };
+  return `rgb(${channel(0)}, ${channel(1)}, ${channel(2)})`;
 }
 
 export type ShaderVariantId = (typeof SHADER_VARIANTS)[number]["id"];

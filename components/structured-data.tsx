@@ -1,5 +1,4 @@
 import { siteConfig } from "@/lib/metadata";
-import { FAQ_ITEMS } from "@/lib/faq-data";
 import type { ReactNode } from "react";
 
 function jsonLd(data: object): string {
@@ -11,8 +10,21 @@ export function StructuredData(): ReactNode {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteConfig.name,
+    legalName: "Epicurean Spirits International, Inc.",
+    alternateName: "Epicurean Spirits International",
+    description: siteConfig.description,
     url: siteConfig.url,
     logo: `${siteConfig.url}/icon.svg`,
+    email: siteConfig.contactEmail,
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: siteConfig.contactEmail,
+    },
+    brand: [
+      { "@type": "Brand", name: "La Gran Señora Tequila" },
+      { "@type": "Brand", name: "Moon LIT Cove Rum" },
+    ],
     sameAs: [`https://twitter.com/${siteConfig.creator.replace(/^@/, "")}`],
   };
 
@@ -25,52 +37,6 @@ export function StructuredData(): ReactNode {
     publisher: { "@type": "Organization", name: siteConfig.name },
   };
 
-  const software = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: siteConfig.name,
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
-    description: siteConfig.description,
-    url: siteConfig.url,
-    offers: [
-      {
-        "@type": "Offer",
-        name: "Pro",
-        price: "29",
-        priceCurrency: "USD",
-        priceSpecification: {
-          "@type": "UnitPriceSpecification",
-          price: "29",
-          priceCurrency: "USD",
-          unitText: "seat / month",
-        },
-      },
-      {
-        "@type": "Offer",
-        name: "Enterprise",
-        priceSpecification: {
-          "@type": "PriceSpecification",
-          priceCurrency: "USD",
-          description: "Custom pricing",
-        },
-      },
-    ],
-  };
-
-  const faq = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQ_ITEMS.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.a,
-      },
-    })),
-  };
-
   return (
     <>
       <script
@@ -80,14 +46,6 @@ export function StructuredData(): ReactNode {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(website) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(software) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(faq) }}
       />
     </>
   );

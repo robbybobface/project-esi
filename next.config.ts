@@ -36,3 +36,7 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Bindings + env parity when developing against the Workers runtime locally
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();

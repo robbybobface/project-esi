@@ -1,18 +1,10 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { ImageResponse } from "next/og";
-
-// Required for filesystem image loading in ImageResponse
-export const runtime = "nodejs";
 
 // Generated Open Graph card served at /opengraph-image
 export const alt =
   "ESI — Epicurean Spirits International. Heritage built. Hospitality driven. Global ready.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-
-const bgSrc = `data:image/jpeg;base64,${readFileSync(join(process.cwd(), "public/og-bg.jpg")).toString("base64")}`;
-const logoSrc = `data:image/svg+xml;base64,${readFileSync(join(process.cwd(), "public/esi_logo.svg")).toString("base64")}`;
 
 // Same slant as the site header lockup: the logo's right edge runs 59px over
 // 230px of height, which is a skew of ~14.4 degrees
@@ -21,7 +13,25 @@ const TRAPEZOID_SKEW_DEG = (Math.atan(59 / 230) * 180) / Math.PI;
 const LOGO_HEIGHT = 76;
 const LOGO_WIDTH = Math.round(LOGO_HEIGHT * (487 / 230));
 
-export default function OpengraphImage(): ImageResponse {
+async function assetDataUrl(assetUrl: URL, mime: string): Promise<string> {
+  // Bundler-resolved URL — Workers have no public/ filesystem at runtime
+  const res = await fetch(assetUrl);
+  if (!res.ok) {
+    throw new Error(`Failed to load OG asset: ${assetUrl.pathname}`);
+  }
+  const buf = Buffer.from(await res.arrayBuffer());
+  return `data:${mime};base64,${buf.toString("base64")}`;
+}
+
+export default async function OpengraphImage(): Promise<ImageResponse> {
+  const [bgSrc, logoSrc] = await Promise.all([
+    assetDataUrl(new URL("../public/og-bg.jpg", import.meta.url), "image/jpeg"),
+    assetDataUrl(
+      new URL("../public/esi_logo.svg", import.meta.url),
+      "image/svg+xml",
+    ),
+  ]);
+
   return new ImageResponse(
     <div
       style={{
@@ -159,6 +169,6 @@ export default function OpengraphImage(): ImageResponse {
         </div>
       </div>
     </div>,
-    size
+    size,
   );
 }

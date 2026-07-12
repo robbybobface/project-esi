@@ -1,5 +1,6 @@
 "use server";
 
+import { isPasswordProtected } from "@/lib/config";
 import { cookies } from "next/headers";
 
 const ACCESS_COOKIE = "esi_access";
@@ -24,9 +25,12 @@ export async function unlock(
   _prev: UnlockState,
   formData: FormData,
 ): Promise<UnlockState> {
+  // PASSWORD_PROTECTED=false — treat as unlocked
+  if (!isPasswordProtected()) return { ok: true };
+
   const expected = process.env.SITE_PASSWORD;
 
-  // Gate disabled — treat as unlocked
+  // Gate disabled when no password is configured — treat as unlocked
   if (!expected) return { ok: true };
 
   const submitted = formData.get("password");

@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.join(__dirname, "..");
+// Light-mode OG: sunshine mesh + white lockup (matches hero text-white)
 const bg = fs.readFileSync(path.join(root, "public/og-bg.jpg")).toString("base64");
 const logo = fs
   .readFileSync(path.join(root, "public/esi_logo.svg"))

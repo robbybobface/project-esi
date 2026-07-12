@@ -14,6 +14,7 @@
   "observability": {
     "enabled": false
   }
-  // SITE_PASSWORD / other secrets: do NOT put in `vars` here (would commit to git).
+  // PASSWORD_PROTECTED: plain Worker var (true/false, default true). Dashboard or .dev.vars.
+  // SITE_PASSWORD: secret only — do NOT put in `vars` here (would commit to git).
   // Local: .dev.vars  |  Production: `npx wrangler secret put SITE_PASSWORD`
 }

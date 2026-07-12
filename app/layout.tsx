@@ -1,6 +1,7 @@
 import { Providers } from "@/components/providers";
 import { SkipToContent } from "@/components/skip-to-content";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { isPasswordProtected } from "@/lib/config";
 import { baseMetadata } from "@/lib/metadata";
 import {
   resolveTheme,
@@ -62,9 +63,13 @@ export default async function RootLayout({
         {/* Blocking: set theme class + CSS vars before first paint */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <style dangerouslySetInnerHTML={{ __html: THEME_CRITICAL_CSS }} />
-        {/* Prefetch both gate gradients so theme toggle is instant */}
-        <link rel="preload" href="/gate-gradient.svg" as="image" />
-        <link rel="preload" href="/gate-gradient-dark.svg" as="image" />
+        {/* Prefetch gate gradients only when the password splash can show */}
+        {isPasswordProtected() ? (
+          <>
+            <link rel="preload" href="/gate-gradient.svg" as="image" />
+            <link rel="preload" href="/gate-gradient-dark.svg" as="image" />
+          </>
+        ) : null}
       </head>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <Providers initialTheme={initialTheme} themeExplicit={themeExplicit}>

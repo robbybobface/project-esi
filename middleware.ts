@@ -1,3 +1,4 @@
+import { isPasswordProtected } from "@/lib/config";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Password gate: requests without a valid access cookie are rewritten to the
@@ -17,6 +18,16 @@ async function sha256Hex(value: string): Promise<string> {
 }
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
+  const { pathname } = request.nextUrl;
+
+  // PASSWORD_PROTECTED=false — skip gating entirely
+  if (!isPasswordProtected()) {
+    if (pathname === "/gate") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.next();
+  }
+
   const password = process.env.SITE_PASSWORD;
 
   // Gate disabled when no password is configured
@@ -25,8 +36,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const expected = await sha256Hex(password);
   const cookie = request.cookies.get(ACCESS_COOKIE)?.value;
   const unlocked = cookie === expected;
-
-  const { pathname } = request.nextUrl;
 
   // Direct visits to /gate: send unlocked users home, let others through
   if (pathname === "/gate") {

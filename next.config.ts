@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Required by @opennextjs/cloudflare (looks under .next/standalone)
+  output: "standalone",
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,

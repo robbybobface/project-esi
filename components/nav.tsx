@@ -107,7 +107,7 @@ export function Nav({ delay = 1.4, active = true }: NavProps): ReactNode {
             }}
             transition={{ duration: 0.45, ease: easeOutExpo }}
           >
-            {/* Fixed 42px layout box; the logo shrinks inside it via transform
+            {/* Desktop 42px / mobile 28px layout box; scroll shrinks via transform
                 (GPU-composited, no layout/re-raster per frame) */}
             <motion.span
               initial={false}
@@ -117,18 +117,14 @@ export function Nav({ delay = 1.4, active = true }: NavProps): ReactNode {
                   : 1,
               }}
               transition={{ duration: 0.45, ease: easeOutExpo }}
-              className="relative block will-change-transform"
-              style={{
-                height: WORDMARK_HEIGHT,
-                width: WORDMARK_HEIGHT * (487 / 230),
-              }}
+              className="relative block h-[42px] w-[89px] will-change-transform max-[850px]:h-7 max-[850px]:w-[59px]"
             >
               <Image
                 src="/esi_logo.svg"
                 alt="ESI — Epicurean Spirits International"
                 fill
                 priority
-                sizes="89px"
+                sizes="(max-width: 850px) 59px, 89px"
                 className={[
                   "object-contain transition-opacity duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]",
                   scrolled ? "opacity-0" : "opacity-100",
@@ -139,7 +135,7 @@ export function Nav({ delay = 1.4, active = true }: NavProps): ReactNode {
                 alt=""
                 aria-hidden
                 fill
-                sizes="89px"
+                sizes="(max-width: 850px) 59px, 89px"
                 className={[
                   "object-contain transition-opacity duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]",
                   scrolled ? "opacity-100" : "opacity-0",

@@ -16,11 +16,7 @@ void main(){
 `;
 
 const FRAG = `
-#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
-#else
-precision mediump float;
-#endif
 varying vec2 v;
 uniform float t;
 uniform vec2 r;
@@ -35,48 +31,50 @@ uniform vec3 u_pal_cursor;
 uniform vec3 u_pal_rgScale;
 uniform float u_brightness;
 uniform float u_accent;
-// >1 in dark mode: accents only fire in noise peaks (distinct wisps, not fog)
 uniform float u_peak;
-// Cursor trail strength (lower in dark so the follow-glow isn't a spotlight)
 uniform float u_cursorGain;
+// 1 on phone/coarse-pointer only — desktop + desktop portrait stay on the matte path
+uniform float u_mobile;
 
-float h(vec2 p){
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
+float hash(vec2 p){
+  // Avoid fract(x*y) — that hash draws diagonal seams on mobile GPUs
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
 }
 
 float n(vec2 u){
   vec2 i = floor(u);
   vec2 f = fract(u);
-  // Quintic Hermite — C2 smooth; cubic smoothstep leaves visible cell ridges on mobile
   f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-  float a = h(i);
-  float b = h(i + vec2(1.0, 0.0));
-  float c = h(i + vec2(0.0, 1.0));
-  float d = h(i + vec2(1.0, 1.0));
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// Rotate noise domain; irrational angles so lattice edges don't stack into bands
-vec2 rot(vec2 p, float ang){
-  float s = sin(ang);
-  float c = cos(ang);
-  return vec2(c * p.x - s * p.y, s * p.x + c * p.y);
+float m(vec2 u){
+  // Soft matte fbm — same cloudy look that reads well on desktop
+  return (n(u) * 0.5 + n(u * 2.0) * 0.25 + n(u * 4.0) * 0.125) * 0.914;
 }
 
-float m(vec2 u){
-  // Each octave on a differently rotated lattice — kills coherent diagonal facets
-  // that a single rot45 left behind on mobile GPUs.
-  float v = n(rot(u, 0.37)) * 0.50;
-  v += n(rot(u * 2.03, 1.91)) * 0.25;
-  v += n(rot(u * 4.11, 2.74)) * 0.125;
-  v += n(rot(u * 8.27, 0.83)) * 0.0625;
-  return v * 0.95;
+// Phone-only: blur the noise field so value-noise cell edges don't posterize
+float mMobile(vec2 u){
+  float e = 0.045;
+  float s = m(u);
+  s += m(u + vec2( e,  0.0));
+  s += m(u + vec2(-e,  0.0));
+  s += m(u + vec2( 0.0,  e));
+  s += m(u + vec2( 0.0, -e));
+  s += m(u + vec2( e,  e)) * 0.5;
+  s += m(u + vec2(-e,  e)) * 0.5;
+  s += m(u + vec2( e, -e)) * 0.5;
+  s += m(u + vec2(-e, -e)) * 0.5;
+  return s / 7.0;
 }
 
 void main(){
-  // Aspect from the shorter side so portrait doesn't stretch the noise field
   float scale = min(r.x, r.y);
   vec2 uv = (v * 0.5 + 0.5) * r / scale;
 
@@ -85,33 +83,33 @@ void main(){
   float dC = length(toC);
   float fall = exp(-dC * 9.0) * ci;
 
-  // Cursor warp samples a separate rotated domain (not the color lattice)
   vec2 sh = vec2(
-    n(rot(uv, 1.17) * 5.5 + vec2(t * 0.9,  0.0)),
-    n(rot(uv, 2.41) * 5.5 + vec2(0.0, t * 1.1))
+    n(uv * 5.5 + vec2(t * 0.9, 0.0)),
+    n(uv * 5.5 + vec2(0.0, t * 1.1))
   ) - 0.5;
   vec2 disp = sh * fall * 0.55;
 
-  // Mild domain warp only — avoid one global 45° rotate (that made diagonal bands)
-  uv = uv * 4.2 + disp * 4.2 + rot(uv, 0.61) * 0.35;
+  // Matte path: no rot45 (that made the diamond grid). Mobile uses a slightly
+  // higher frequency so residual cells are finer before the blur hides them.
+  float freq = mix(4.2, 5.6, u_mobile);
+  uv = uv * freq + disp * freq;
 
   vec2 d1 = vec2( 0.18,  0.07) * t;
   vec2 d2 = vec2(-0.13,  0.21) * t;
   vec2 d3 = vec2( 0.09, -0.16) * t;
 
-  float a = m(uv + d1);
-  // Peak-shaped mixes: dark mode uses u_peak > 1 so warm/mid read as islands
-  // against navy. Warm (yellow) uses a sharper peak than mid so gold stays
-  // bright where it hits but rare — navy remains the field.
-  float warmAmt = pow(clamp(a, 0.0, 1.0), max(u_peak * 1.35, 1.0)) * 1.75 * u_accent;
+  float a = mix(m(uv + d1), mMobile(uv + d1), u_mobile);
+  // Slightly softer peaks on mobile so iso-lines don't etch over cell edges
+  float peakW = mix(u_peak * 1.35, u_peak * 1.15, u_mobile);
+  float peakM = mix(u_peak, max(u_peak * 0.9, 1.0), u_mobile);
+  float warmAmt = pow(clamp(a, 0.0, 1.0), max(peakW, 1.0)) * 1.75 * u_accent;
   vec3 col = mix(u_pal_base, u_pal_warm, clamp(warmAmt, 0.0, 1.0));
 
-  float b = m(uv + a * 2.0 + d2);
-  float midAmt = pow(clamp(b, 0.0, 1.0), u_peak) * 1.25 * u_accent;
+  float b = mix(m(uv + a * 2.0 + d2), mMobile(uv + a * 2.0 + d2), u_mobile);
+  float midAmt = pow(clamp(b, 0.0, 1.0), max(peakM, 1.0)) * 1.25 * u_accent;
   col = mix(col, u_pal_mid, clamp(midAmt, 0.0, 1.0));
 
-  float dd = m(uv + b * 2.8 + d3);
-  // Cool stays softer than mid so depth pockets don't compete with sky wisps
+  float dd = mix(m(uv + b * 2.8 + d3), mMobile(uv + b * 2.8 + d3), u_mobile);
   float coolAmt = pow(clamp(dd, 0.0, 1.0), max(u_peak * 0.75, 1.0)) * u_accent;
   col = mix(col, u_pal_cool, clamp(coolAmt, 0.0, 1.0));
 
@@ -197,6 +195,14 @@ export function ShaderCanvas({ className }: Props): ReactNode {
         u_accent: { value: 1.0 },
         u_peak: { value: isDarkRef.current ? 2.45 : 1.0 },
         u_cursorGain: { value: isDarkRef.current ? 0.4 : 1.0 },
+        // Phones only (coarse pointer) — not desktop portrait width
+        u_mobile: {
+          value:
+            typeof window !== "undefined" &&
+            window.matchMedia("(hover: none) and (pointer: coarse)").matches
+              ? 1.0
+              : 0.0,
+        },
       },
     });
     uniformsRef.current = program.uniforms as Record<

@@ -239,17 +239,16 @@ export const SHADER_VARIANTS: readonly ShaderVariant[] = [
       rgScale: rgb(1.0, 1.0, 1.0),
       brightness: 2.5,
     },
-    // Dark: gate navy field + the same yellow/cyan the vision WaveShader
-    // ribbons use (wave[3]/wave[1]). Peak mixes keep them as distinct notes.
-    // Wisps are a touch dimmer than the vision ribbons so they sit in the field.
+    // Dark: gate navy field + vision yellow/cyan. Lifted a notch overall so the
+    // hero doesn't read as underexposed against the UI.
     heroDark: {
-      base: rgb(0.022, 0.090, 0.165),
-      warm: rgb(1.000, 0.940, 0.280),
-      mid: rgb(0.110, 0.400, 0.580),
-      cool: rgb(0.012, 0.055, 0.110),
-      cursor: rgb(0.100, 0.280, 0.400),
-      rgScale: rgb(0.95, 0.98, 1.12),
-      brightness: 1.32,
+      base: rgb(0.040, 0.130, 0.220),
+      warm: rgb(1.000, 0.950, 0.320),
+      mid: rgb(0.160, 0.480, 0.680),
+      cool: rgb(0.030, 0.100, 0.175),
+      cursor: rgb(0.120, 0.320, 0.450),
+      rgScale: rgb(0.96, 0.99, 1.14),
+      brightness: 1.52,
     },
     wave: [
       rgb(0.000, 0.280, 0.450),

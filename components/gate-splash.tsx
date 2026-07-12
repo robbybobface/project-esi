@@ -90,7 +90,7 @@ export function GateSplash(): ReactNode {
         >
           {/* Same theme lockup as the Preloader so the handoff doesn't swap marks */}
           <Image
-            src="/esi_logo_alt_trace.svg"
+            src="/esi_logo_alt.svg"
             alt="ESI — Epicurean Spirits International"
             width={106}
             height={50}

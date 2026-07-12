@@ -157,7 +157,7 @@ export function Preloader(): ReactNode {
             className="flex flex-col items-center gap-5"
           >
             <Image
-              src="/esi_logo_alt_trace.svg"
+              src="/esi_logo_alt.svg"
               alt=""
               width={106}
               height={50}

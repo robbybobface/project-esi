@@ -5,6 +5,7 @@ import { ShaderCanvas } from "@/components/shader-canvas";
 import { useShaderVariant } from "@/components/shader-variant-context";
 import { useReducedMotion } from "@/lib/motion";
 import { heroPlaceholderColor } from "@/lib/shader-variants";
+import { useIsDark } from "@/lib/color-scheme";
 import { motion } from "motion/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -31,6 +32,7 @@ export function StatusPage({
   resetLabel = "Try again",
 }: StatusPageProps): ReactNode {
   const { variant } = useShaderVariant();
+  const isDark = useIsDark();
   const prefersReducedMotion = useReducedMotion();
 
   const fadeUp = prefersReducedMotion
@@ -40,7 +42,7 @@ export function StatusPage({
   return (
     <main
       className="relative min-h-screen w-full overflow-hidden text-white"
-      style={{ backgroundColor: heroPlaceholderColor(variant) }}
+      style={{ backgroundColor: heroPlaceholderColor(variant, isDark) }}
       aria-labelledby="status-page-heading"
     >
       <div aria-hidden className="absolute inset-0">

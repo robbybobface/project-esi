@@ -28,6 +28,17 @@ export interface ShaderVariant {
     brightness: number;
   };
 
+  // Optional lower-luminance hero palette for dark mode (same hue family)
+  heroDark?: {
+    base: RGB;
+    warm: RGB;
+    mid: RGB;
+    cool: RGB;
+    cursor: RGB;
+    rgScale: RGB;
+    brightness: number;
+  };
+
   wave: readonly [RGB, RGB, RGB, RGB, RGB];
 }
 
@@ -228,6 +239,17 @@ export const SHADER_VARIANTS: readonly ShaderVariant[] = [
       rgScale: rgb(1.0, 1.0, 1.0),
       brightness: 2.5,
     },
+    // Dark: navy + cyan (not olive) + muted gold — keep hues separated so
+    // mixes don't crush into muddy brown-green
+    heroDark: {
+      base: rgb(0.020, 0.050, 0.120),
+      warm: rgb(0.380, 0.300, 0.055),
+      mid: rgb(0.050, 0.280, 0.400),
+      cool: rgb(0.025, 0.140, 0.320),
+      cursor: rgb(0.040, 0.110, 0.200),
+      rgScale: rgb(1.0, 1.0, 1.0),
+      brightness: 2.05,
+    },
     wave: [
       rgb(0.000, 0.280, 0.450),
       rgb(0.150, 0.500, 0.700),
@@ -286,15 +308,29 @@ export function waveAccentGradient(variant: ShaderVariant): string {
   return `linear-gradient(100deg, ${[...stops, ...[...stops].reverse()].join(", ")})`;
 }
 
+// Active hero palette for the current color scheme (dark uses heroDark when set)
+export function resolveHeroPalette(
+  variant: ShaderVariant,
+  isDark: boolean,
+): ShaderVariant["hero"] {
+  if (isDark && variant.heroDark) return variant.heroDark;
+  return variant.hero;
+}
+
 // CSS color for the placeholder shown behind the hero/CTA shader before
 // WebGL paints its first frame. The rendered gradient is a bright blend of
 // the palette's warm/mid/cool colors over the base, so approximate that
 // blend rather than using the (much darker) base color alone.
-export function heroPlaceholderColor(variant: ShaderVariant): string {
-  const { base, warm, mid, cool } = variant.hero;
+export function heroPlaceholderColor(
+  variant: ShaderVariant,
+  isDark = false,
+): string {
+  const { base, warm, mid, cool } = resolveHeroPalette(variant, isDark);
+  // Dark mode: less lift so the pre-WebGL frame stays atmospheric
+  const lift = isDark ? 1.2 : 1.3;
   const channel = (i: number): number => {
     const blended = base[i]! + 0.5 * (warm[i]! + mid[i]! + cool[i]!);
-    return Math.round(Math.min(blended * 1.3, 1) * 255);
+    return Math.round(Math.min(blended * lift, 1) * 255);
   };
   return `rgb(${channel(0)}, ${channel(1)}, ${channel(2)})`;
 }

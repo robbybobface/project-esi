@@ -15,6 +15,7 @@ import { ShaderCanvas } from "@/components/shader-canvas";
 import { Nav } from "@/components/nav";
 import { useShaderVariant } from "@/components/shader-variant-context";
 import { heroPlaceholderColor } from "@/lib/shader-variants";
+import { useIsDark } from "@/lib/color-scheme";
 
 const easeOutExpo = [0.33, 1, 0.68, 1] as const;
 
@@ -27,6 +28,7 @@ const SCROLL_RANGE = 80;
 
 export function Hero(): ReactNode {
   const { variant } = useShaderVariant();
+  const isDark = useIsDark();
   const { ready: introReady } = useIntro();
 
   // Failsafe if the preloader never signals — never leave the tiny center pill
@@ -103,7 +105,7 @@ export function Hero(): ReactNode {
               height,
               borderRadius,
               // Matches the shader palette so the pre-WebGL frame isn't a color mismatch
-              backgroundColor: heroPlaceholderColor(variant),
+              backgroundColor: heroPlaceholderColor(variant, isDark),
             }}
           >
             <div aria-hidden="true" className="absolute inset-0 h-full w-full">

@@ -1,6 +1,8 @@
 "use client";
 
 import { useShaderVariant } from "@/components/shader-variant-context";
+import { useIsDark } from "@/lib/color-scheme";
+import { resolveHeroPalette } from "@/lib/shader-variants";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
 import { useEffect, useRef, type ReactNode } from "react";
 
@@ -95,11 +97,17 @@ const DPR_CAP = 1.5;
 export function ShaderCanvas({ className }: Props): ReactNode {
   const hostRef = useRef<HTMLDivElement>(null);
   const { variant } = useShaderVariant();
+  const isDark = useIsDark();
 
   const variantRef = useRef(variant);
   useEffect(() => {
     variantRef.current = variant;
   }, [variant]);
+
+  const isDarkRef = useRef(isDark);
+  useEffect(() => {
+    isDarkRef.current = isDark;
+  }, [isDark]);
 
   const uniformsRef = useRef<Record<string, { value: unknown }> | null>(null);
 
@@ -133,6 +141,7 @@ export function ShaderCanvas({ className }: Props): ReactNode {
     const geometry = new Triangle(gl);
 
     const v0 = variantRef.current;
+    const h0 = resolveHeroPalette(v0, isDarkRef.current);
     const program = new Program(gl, {
       vertex: VERT,
       fragment: FRAG,
@@ -144,13 +153,13 @@ export function ShaderCanvas({ className }: Props): ReactNode {
         r: { value: [1, 1] },
         c: { value: [0, 0] },
         ci: { value: 0 },
-        u_pal_base: { value: [...v0.hero.base] },
-        u_pal_warm: { value: [...v0.hero.warm] },
-        u_pal_mid: { value: [...v0.hero.mid] },
-        u_pal_cool: { value: [...v0.hero.cool] },
-        u_pal_cursor: { value: [...v0.hero.cursor] },
-        u_pal_rgScale: { value: [...v0.hero.rgScale] },
-        u_brightness: { value: v0.hero.brightness },
+        u_pal_base: { value: [...h0.base] },
+        u_pal_warm: { value: [...h0.warm] },
+        u_pal_mid: { value: [...h0.mid] },
+        u_pal_cool: { value: [...h0.cool] },
+        u_pal_cursor: { value: [...h0.cursor] },
+        u_pal_rgScale: { value: [...h0.rgScale] },
+        u_brightness: { value: h0.brightness },
       },
     });
     uniformsRef.current = program.uniforms as Record<
@@ -325,7 +334,7 @@ export function ShaderCanvas({ className }: Props): ReactNode {
   useEffect(() => {
     const u = uniformsRef.current;
     if (!u) return;
-    const h = variant.hero;
+    const h = resolveHeroPalette(variant, isDark);
 
     (u.u_pal_base!.value as number[]).splice(0, 3, ...h.base);
     (u.u_pal_warm!.value as number[]).splice(0, 3, ...h.warm);
@@ -334,7 +343,7 @@ export function ShaderCanvas({ className }: Props): ReactNode {
     (u.u_pal_cursor!.value as number[]).splice(0, 3, ...h.cursor);
     (u.u_pal_rgScale!.value as number[]).splice(0, 3, ...h.rgScale);
     u.u_brightness!.value = h.brightness;
-  }, [variant]);
+  }, [variant, isDark]);
 
   return (
     <div

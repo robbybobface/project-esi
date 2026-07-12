@@ -125,8 +125,9 @@ export function ThemeSwitch(): ReactNode {
         aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
         aria-pressed={isDark}
         type="button"
-        whileTap={prefersReducedMotion ? undefined : { scale: 0.92 }}
-        whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+        {...(prefersReducedMotion
+          ? {}
+          : { whileTap: { scale: 0.92 }, whileHover: { scale: 1.05 } })}
       >
         <ThemeGlyph isDark={isDark} />
       </motion.button>

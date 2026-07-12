@@ -3,6 +3,7 @@
 import { IntroProvider } from "@/components/intro-provider";
 import { ShaderVariantProvider } from "@/components/shader-variant-context";
 import { SmoothScroll } from "@/components/smooth-scroll";
+import { InitialThemeProvider } from "@/lib/color-scheme";
 import { ReducedMotionProvider } from "@/lib/motion";
 import { MotionConfig } from "motion/react";
 import { ThemeProvider } from "next-themes";
@@ -26,15 +27,17 @@ export function Providers({
       storageKey="theme"
       disableTransitionOnChange
     >
-      <ReducedMotionProvider>
-        <MotionConfig reducedMotion="user">
-          <ShaderVariantProvider>
-            <IntroProvider>
-              <SmoothScroll>{children}</SmoothScroll>
-            </IntroProvider>
-          </ShaderVariantProvider>
-        </MotionConfig>
-      </ReducedMotionProvider>
+      <InitialThemeProvider theme={initialTheme}>
+        <ReducedMotionProvider>
+          <MotionConfig reducedMotion="user">
+            <ShaderVariantProvider>
+              <IntroProvider>
+                <SmoothScroll>{children}</SmoothScroll>
+              </IntroProvider>
+            </ShaderVariantProvider>
+          </MotionConfig>
+        </ReducedMotionProvider>
+      </InitialThemeProvider>
     </ThemeProvider>
   );
 }

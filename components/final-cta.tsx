@@ -6,6 +6,7 @@ import { ArrowChip } from "@/components/arrow-chip";
 import { ShaderCanvas } from "@/components/shader-canvas";
 import { useShaderVariant } from "@/components/shader-variant-context";
 import { heroPlaceholderColor } from "@/lib/shader-variants";
+import { useIsDark } from "@/lib/color-scheme";
 
 const easeOutExpo = [0.33, 1, 0.68, 1] as const;
 
@@ -15,6 +16,7 @@ export function FinalCta(): ReactNode {
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, { once: true, amount: 0.35 });
   const { variant } = useShaderVariant();
+  const isDark = useIsDark();
 
   return (
     <section
@@ -30,7 +32,7 @@ export function FinalCta(): ReactNode {
           transition={{ duration: 1, ease: easeOutExpo }}
           className="relative overflow-hidden rounded-3xl min-h-[520px] max-[850px]:min-h-[420px]"
           // Matches the shader palette so the pre-WebGL frame isn't a color mismatch
-          style={{ backgroundColor: heroPlaceholderColor(variant) }}
+          style={{ backgroundColor: heroPlaceholderColor(variant, isDark) }}
         >
           <div aria-hidden className="absolute inset-0">
             <ShaderCanvas />

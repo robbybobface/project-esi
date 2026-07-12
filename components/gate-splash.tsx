@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState, type ReactNode } from "react";
+import { useActionState, useEffect, type ReactNode } from "react";
 import { ArrowChip } from "@/components/arrow-chip";
 import { FluidCursor } from "@/components/fluid-cursor";
 import { unlock, type UnlockState } from "@/app/gate/actions";
@@ -17,12 +17,12 @@ export function GateSplash(): ReactNode {
     unlock,
     {},
   );
-  const [exiting, setExiting] = useState(false);
+  // Unlock success is the exit signal — no mirrored useState/effect sync
+  const exiting = Boolean(state.ok);
 
   useEffect(() => {
     if (!state.ok) return;
 
-    setExiting(true);
     markFromGate();
 
     // Soft refresh keeps the document (and centered logo) in place — a hard
@@ -152,7 +152,7 @@ export function GateSplash(): ReactNode {
             <h1 className="font-display text-2xl font-bold tracking-tight text-white max-[850px]:text-xl">
               Something exceptional is coming.
             </h1>
-            <p className="mx-auto mt-3 max-w-[44ch] text-sm leading-relaxed text-white/60">
+            <p className="mx-auto mt-3 max-w-[44ch] text-base leading-relaxed text-white/60 max-[850px]:text-lg">
               A global experiences and hospitality brand, built on generations
               of heritage. Enter the password for early access.
             </p>

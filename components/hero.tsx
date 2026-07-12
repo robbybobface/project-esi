@@ -159,7 +159,7 @@ export function Hero(): ReactNode {
 
               <div className="flex items-end justify-between gap-8 max-[850px]:flex-col max-[850px]:items-start">
                 <motion.p
-                  className="max-w-xl text-2xl leading-snug font-medium tracking-tight text-white/90 max-[850px]:text-lg"
+                  className="max-w-xl text-2xl leading-snug font-medium tracking-tight text-white/90 max-[850px]:text-xl"
                   variants={{
                     hidden: { opacity: 0, y: 16 },
                     visible: { opacity: 1, y: 0 },

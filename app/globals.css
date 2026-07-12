@@ -119,6 +119,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Soleil body copy — slightly larger on mobile (mono/display/subhead stay put) */
+@media (max-width: 850px) {
+  body {
+    font-size: 1.0625rem;
+  }
+}
+
 /* Display type is always bold Articulat — unlayered so it wins over
    the font-medium utility the headline markup carries */
 .font-display {

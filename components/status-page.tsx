@@ -77,7 +77,7 @@ export function StatusPage({
           </motion.h1>
 
           <motion.p
-            className="max-w-md text-lg max-[850px]:text-base font-regular tracking-tight leading-snug text-white/75"
+            className="max-w-md text-lg font-regular tracking-tight leading-snug text-white/75 max-[850px]:text-xl"
             initial={fadeUp.initial}
             animate={fadeUp.animate}
             transition={{ duration: 0.8, ease: easeOutExpo, delay: prefersReducedMotion ? 0 : 0.16 }}

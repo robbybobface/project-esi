@@ -79,7 +79,7 @@ function Row({ item, index, open, onToggle, inView }: RowProps): ReactNode {
             >
               <div className="flex gap-6 px-2 pb-8 max-[850px]:pb-6">
                 <span className="w-10 max-[850px]:w-8 shrink-0" aria-hidden />
-                <p className="max-w-[68ch] text-base max-[850px]:text-sm leading-relaxed text-foreground/65 pr-12">
+                <p className="max-w-[68ch] text-base leading-relaxed text-foreground/65 pr-12 max-[850px]:text-lg">
                   {item.a}
                 </p>
               </div>

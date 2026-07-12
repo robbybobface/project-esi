@@ -83,7 +83,7 @@ export function Heritage(): ReactNode {
               initial={{ opacity: 0, y: 8 }}
               animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
               transition={{ duration: 0.7, ease: easeOutExpo, delay: 0.18 }}
-              className="mt-6 max-w-[60ch] text-balance text-xl max-[850px]:text-lg font-light leading-snug text-foreground/60"
+              className="mt-6 max-w-[60ch] text-balance text-xl font-light leading-snug text-foreground/60"
             >
               For over 250 years, the Camarena family has cultivated agave
               and protected the craft of tequila making in Los Altos de
@@ -158,7 +158,7 @@ function renderLegacyCard(
             </span>
           </div>
 
-          <p className="mt-6 text-sm leading-relaxed text-foreground/60 max-w-[52ch]">
+          <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-foreground/60 max-[850px]:text-xl">
             {legacy.body}
           </p>
         </div>
@@ -167,7 +167,7 @@ function renderLegacyCard(
           {legacy.milestones.map((milestone) => (
             <li
               key={milestone}
-              className="flex items-start gap-3 text-sm text-foreground/85"
+              className="flex items-start gap-3 text-lg text-foreground/85"
             >
               <Check
                 className="mt-0.5 h-4 w-4 shrink-0 text-foreground/60"

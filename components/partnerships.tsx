@@ -76,7 +76,7 @@ export function Partnerships(): ReactNode {
               initial={{ opacity: 0, y: 8 }}
               animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
               transition={{ duration: 0.7, ease: easeOutExpo, delay: 0.18 }}
-              className="mt-6 max-w-[60ch] text-balance text-xl max-[850px]:text-lg font-light leading-snug text-foreground/60"
+              className="mt-6 max-w-[60ch] text-balance text-xl font-light leading-snug text-foreground/60"
             >
               The exclusive global product and distillery provider joins the
               exclusive global brand and distribution provider — creating a
@@ -153,7 +153,7 @@ function renderPillarCard(
           <h3 className="font-subhead mt-3 text-2xl max-[850px]:text-xl font-medium leading-tight tracking-tight">
             {pillar.title}
           </h3>
-          <p className={["mt-3 text-sm leading-relaxed", tone.body].join(" ")}>
+          <p className={["mt-3 text-base leading-relaxed max-[850px]:text-lg", tone.body].join(" ")}>
             {pillar.body}
           </p>
         </div>

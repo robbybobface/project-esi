@@ -158,7 +158,7 @@ export function Ecosystem(): ReactNode {
               initial={{ opacity: 0, y: 8 }}
               animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
               transition={{ duration: 0.7, ease: easeOutExpo, delay: 0.18 }}
-              className="mt-8 max-w-[60ch] text-balance text-base max-[850px]:text-sm leading-relaxed text-foreground/65"
+              className="mt-8 max-w-[60ch] text-balance text-lg leading-relaxed text-foreground/65 max-[850px]:text-xl"
             >
               La Gran Señora is more than a premium tequila — it&rsquo;s the
               center of a connected luxury ecosystem. Six pillars spanning
@@ -244,7 +244,7 @@ export function Ecosystem(): ReactNode {
                     {tile.title}
                   </h3>
                   <p
-                    className={["mt-3 text-sm leading-relaxed", tile.bodyClass].join(" ")}
+                    className={["mt-3 text-lg leading-relaxed max-[850px]:text-xl", tile.bodyClass].join(" ")}
                   >
                     {tile.body}
                   </p>

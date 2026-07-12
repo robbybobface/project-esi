@@ -308,7 +308,7 @@ export function Brands(): ReactNode {
                 <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-foreground/45">
                   {activeBrand.tagline}
                 </p>
-                <p className="mt-6 max-w-[42ch] max-[1100px]:max-w-none text-balance text-base max-[850px]:text-sm leading-relaxed text-foreground/65">
+                <p className="mt-6 max-w-[42ch] max-[1100px]:max-w-none text-balance text-xl font-light leading-snug text-foreground/65">
                   {activeBrand.blurb}
                 </p>
                 {activeBrand.comingSoon ? (

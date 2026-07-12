@@ -274,7 +274,7 @@ export function Team(): ReactNode {
               initial={{ opacity: 0, y: 8 }}
               animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
               transition={{ duration: 0.7, ease: easeOutExpo, delay: 0.18 }}
-              className="text-foreground/60 mt-6 max-w-[60ch] text-xl leading-snug font-light text-balance max-[850px]:text-lg"
+              className="text-foreground/60 mt-6 max-w-[60ch] text-xl leading-snug font-light text-balance"
             >
               A core team and world-class advisors spanning hospitality,
               spirits, finance, entertainment, and technology.
@@ -342,7 +342,7 @@ export function Team(): ReactNode {
                       </h3>
                       <p
                         className={[
-                          "mt-3 text-sm leading-relaxed",
+                          "mt-3 text-lg leading-relaxed max-[850px]:text-xl",
                           tone.body,
                         ].join(" ")}
                       >

@@ -21,8 +21,8 @@ interface DragCarouselProps {
   gapClassName?: string;
 }
 
-// Horizontal drag carousel with momentum, rubber-band edges, a grab cursor,
-// pagination dots (the carousel affordance), and a desktop "Drag" tooltip.
+// Horizontal drag carousel with snap-to-card, rubber-band edges, a grab
+// cursor, pagination dots, and a desktop "Drag" tooltip.
 export function DragCarousel({
   children,
   className,
@@ -36,6 +36,8 @@ export function DragCarousel({
   const [cardCount, setCardCount] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const stepRef = useRef(0);
+  const constraintsRef = useRef({ left: 0, right: 0 });
+  const animRef = useRef<ReturnType<typeof animate> | null>(null);
   const x = useMotionValue(0);
 
   // Tooltip follows the cursor on springs
@@ -49,8 +51,13 @@ export function DragCarousel({
     const wrapper = wrapperRef.current;
     if (!track || !wrapper) return;
 
+    // Skip while display:none (desktop grid breakpoint) — widths are 0
+    if (wrapper.offsetWidth === 0) return;
+
     const maxDrag = Math.min(0, -(track.scrollWidth - wrapper.offsetWidth));
-    setConstraints({ left: maxDrag, right: 0 });
+    const next = { left: maxDrag, right: 0 };
+    constraintsRef.current = next;
+    setConstraints(next);
 
     const count = track.children.length;
     setCardCount(count);
@@ -68,10 +75,23 @@ export function DragCarousel({
   };
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const track = trackRef.current;
+    if (!wrapper || !track) return;
+
     measure();
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(wrapper);
+    ro.observe(track);
+
+    // Fonts can change card width after first paint
+    void document.fonts?.ready.then(() => measure());
+
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-    // Re-measure when children change
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [children]);
 
@@ -88,8 +108,10 @@ export function DragCarousel({
   const goTo = (index: number) => {
     const step = stepRef.current;
     if (step <= 0) return;
-    const target = Math.max(constraints.left, Math.min(0, -index * step));
-    void animate(x, target, {
+    const { left } = constraintsRef.current;
+    const target = Math.max(left, Math.min(0, -index * step));
+    animRef.current?.stop();
+    animRef.current = animate(x, target, {
       type: "spring",
       stiffness: 280,
       damping: 32,
@@ -112,20 +134,14 @@ export function DragCarousel({
     setIsDragging(false);
 
     const step = stepRef.current;
-    if (step > 0) {
-      // Snap to the nearest card after a fling
-      const projected = x.get() + info.velocity.x * 0.25;
-      const index = Math.round(Math.abs(projected) / step);
-      const clamped = Math.min(cardCount - 1, Math.max(0, index));
-      goTo(clamped);
-      return;
-    }
+    if (step <= 0) return;
 
-    const targetX = Math.max(
-      constraints.left,
-      Math.min(0, x.get() + info.velocity.x * 0.3),
-    );
-    x.set(targetX);
+    // Nearest card, with a velocity nudge for intentional flings
+    let index = Math.round(-x.get() / step);
+    if (info.velocity.x < -500) index += 1;
+    if (info.velocity.x > 500) index -= 1;
+    const clamped = Math.min(cardCount - 1, Math.max(0, index));
+    goTo(clamped);
   };
 
   const showDots = cardCount > 1;
@@ -142,20 +158,22 @@ export function DragCarousel({
         <motion.div
           ref={trackRef}
           className={[
-            "flex cursor-grab select-none active:cursor-grabbing",
+            // pan-y keeps page scroll alive; Motion locks to x once a
+            // horizontal drag is recognized (dragDirectionLock)
+            "flex cursor-grab select-none touch-pan-y active:cursor-grabbing",
             gapClassName,
           ].join(" ")}
           style={{ x }}
           drag="x"
           dragConstraints={constraints}
           dragElastic={0.12}
-          dragTransition={{
-            power: 0.25,
-            timeConstant: 180,
-            modifyTarget: (target) =>
-              Math.max(constraints.left, Math.min(0, target)),
+          // Momentum fights our snap spring — handle settle in onDragEnd
+          dragMomentum={false}
+          dragDirectionLock
+          onDragStart={() => {
+            animRef.current?.stop();
+            setIsDragging(true);
           }}
-          onDragStart={() => setIsDragging(true)}
           onDragEnd={handleDragEnd}
         >
           {children}

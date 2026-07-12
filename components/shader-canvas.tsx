@@ -16,7 +16,11 @@ void main(){
 `;
 
 const FRAG = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 varying vec2 v;
 uniform float t;
 uniform vec2 r;
@@ -49,37 +53,47 @@ float n(vec2 u){
 }
 
 float m(vec2 u){
-  return (n(u)*0.5 + n(u*2.0)*0.25) * 1.06667;
+  // Extra octave softens posterized ridges that read as banding on mobile GPUs
+  return (n(u)*0.5 + n(u*2.0)*0.25 + n(u*4.0)*0.125) * 0.914;
+}
+
+// Break axis-aligned value-noise cells (portrait + low precision → vertical stripes)
+vec2 rot45(vec2 p){
+  const float s = 0.70710678;
+  return vec2(p.x * s - p.y * s, p.x * s + p.y * s);
 }
 
 void main(){
-  vec2 uv = (v * 0.5 + 0.5) * r / r.x;
+  // Aspect from the shorter side so portrait doesn't stretch the noise field
+  float scale = min(r.x, r.y);
+  vec2 uv = (v * 0.5 + 0.5) * r / scale;
 
-  vec2 cn = c / r.x;
+  vec2 cn = c / scale;
   vec2 toC = uv - cn;
   float dC = length(toC);
   float fall = exp(-dC * 9.0) * ci;
 
   vec2 sh = vec2(
-    n(uv * 6.0 + vec2(t * 0.9,  0.0)),
-    n(uv * 6.0 + vec2(0.0, t * 1.1))
+    n(rot45(uv) * 5.5 + vec2(t * 0.9,  0.0)),
+    n(rot45(uv) * 5.5 + vec2(0.0, t * 1.1))
   ) - 0.5;
   vec2 disp = sh * fall * 0.55;
 
-  uv = uv * 5.0 + disp * 5.0;
+  uv = rot45(uv * 4.2 + disp * 4.2);
 
   vec2 d1 = vec2( 0.18,  0.07) * t;
   vec2 d2 = vec2(-0.13,  0.21) * t;
   vec2 d3 = vec2( 0.09, -0.16) * t;
 
   float a = m(uv + d1);
-  vec3 col = mix(u_pal_base, u_pal_warm, a * 2.5);
+  // Clamp mix weights — uncapped factors crush into solid color bands on mobile
+  vec3 col = mix(u_pal_base, u_pal_warm, clamp(a * 1.85, 0.0, 1.0));
 
-  float b = m(uv + a * 2.4 + d2);
-  col = mix(col, u_pal_mid, b * 1.5);
+  float b = m(uv + a * 2.0 + d2);
+  col = mix(col, u_pal_mid, clamp(b * 1.35, 0.0, 1.0));
 
-  float dd = m(uv + b * 3.5 + d3);
-  col = mix(col, u_pal_cool, dd);
+  float dd = m(uv + b * 2.8 + d3);
+  col = mix(col, u_pal_cool, clamp(dd, 0.0, 1.0));
 
   col += u_pal_cursor * fall;
 
@@ -178,13 +192,12 @@ export function ShaderCanvas({ className }: Props): ReactNode {
     let lastW = 0;
     let lastH = 0;
     let currentDpr = 0;
-    // During continuous resizes (hero entrance/exit animations) the box is
-    // tracked every frame so the gradient reflows fluidly — but at reduced
-    // resolution, so the per-frame GL buffer reallocation stays cheap. Once
-    // the box stops moving, a trailing settle pass re-renders at full
-    // resolution. A soft gradient hides the momentary resolution drop.
-    const MOTION_DPR = Math.min(dpr, 0.5);
-    const SETTLE_MS = 150;
+    // During continuous resizes (hero entrance) drop DPR slightly — but never
+    // far on narrow viewports: mobile chrome resizes + half-res = vertical banding
+    const narrow =
+      typeof window !== "undefined" && window.matchMedia("(max-width: 850px)").matches;
+    const MOTION_DPR = narrow ? dpr : Math.min(dpr, 0.65);
+    const SETTLE_MS = narrow ? 280 : 150;
     let lastResizeEvent = 0;
     let settleTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -205,9 +218,14 @@ export function ShaderCanvas({ className }: Props): ReactNode {
 
     const resize = () => {
       const now = performance.now();
-      // Consecutive events within the settle window mean an animation is
-      // driving the box size — drop to the cheap motion resolution
-      const rapid = now - lastResizeEvent < SETTLE_MS;
+      const rect = host.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width));
+      const h = Math.max(1, Math.round(rect.height));
+      // Tiny chrome UI shifts (URL bar) shouldn't trigger the low-res path
+      const bigJump =
+        lastW > 0 &&
+        (Math.abs(w - lastW) / lastW > 0.04 || Math.abs(h - lastH) / lastH > 0.04);
+      const rapid = bigJump && now - lastResizeEvent < SETTLE_MS;
       lastResizeEvent = now;
       clearTimeout(settleTimer);
       settleTimer = setTimeout(() => applySize(dpr), SETTLE_MS);

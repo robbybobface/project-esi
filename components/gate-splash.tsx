@@ -88,14 +88,24 @@ export function GateSplash(): ReactNode {
           transition={{ duration: 0.6, ease: easeOutExpo }}
           className="flex flex-col items-center gap-5"
         >
-          {/* Same theme lockup as the Preloader so the handoff doesn't swap marks */}
+          {/* Light: trace on the password form; swap to alt.svg on unlock so
+              the exit handoff matches the preloader lockup */}
           <Image
-            src="/esi_logo_alt.svg"
+            src="/esi_logo_alt_trace.svg"
             alt="ESI — Epicurean Spirits International"
             width={106}
             height={50}
             priority
-            className="theme-light-only"
+            className={["theme-light-only", exiting ? "hidden" : ""].join(" ")}
+          />
+          <Image
+            src="/esi_logo_alt.svg"
+            alt=""
+            aria-hidden
+            width={106}
+            height={50}
+            priority
+            className={["theme-light-only", exiting ? "" : "hidden"].join(" ")}
           />
           <Image
             src="/esi_logo.svg"

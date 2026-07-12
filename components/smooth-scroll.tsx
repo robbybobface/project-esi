@@ -28,8 +28,22 @@ function anchorOffset(): number {
     : ANCHOR_OFFSET_DESKTOP;
 }
 
+function resetScrollToTop(lenis?: Lenis): void {
+  // Skip hash deep-links — those should land on their section
+  if (window.location.hash) return;
+  window.scrollTo(0, 0);
+  lenis?.scrollTo(0, { immediate: true });
+}
+
 export function SmoothScroll({ children }: { children: ReactNode }): ReactNode {
   useEffect(() => {
+    // Mobile Safari especially restores the previous scrollY on refresh,
+    // which lands mid-hero (~200–300px). Pin to top unless a hash is present.
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    resetScrollToTop();
+
     if (!features.smoothScroll) return;
 
     const prefersReducedMotion = window.matchMedia(
@@ -38,8 +52,9 @@ export function SmoothScroll({ children }: { children: ReactNode }): ReactNode {
     if (prefersReducedMotion) return;
 
     const lenis = new Lenis(LENIS_OPTIONS);
+    resetScrollToTop(lenis);
 
-    const MAX_DT = 50; 
+    const MAX_DT = 50;
     let synthTime = 0;
     let lastReal = performance.now();
 

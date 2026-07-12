@@ -255,6 +255,60 @@ function ThemedLogoImage({
     </>
   );
 }
+// Featured-panel copy shared by the invisible height sizer and the live panel
+function BrandCopy({
+  brand,
+  interactive = false,
+}: {
+  brand: Brand;
+  interactive?: boolean;
+}): ReactNode {
+  return (
+    <>
+      <h3 className="font-subhead text-[clamp(1.75rem,3vw,2.5rem)] font-medium leading-[1.05] tracking-tight">
+        {brand.name}
+      </h3>
+      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-foreground/45">
+        {brand.tagline}
+      </p>
+      <p className="mt-6 max-w-[42ch] max-[1100px]:max-w-none text-balance text-xl font-light leading-snug text-foreground/65">
+        {brand.blurb}
+      </p>
+      {brand.comingSoon ? (
+        <span className="text-foreground/55 mt-auto inline-flex items-center gap-3 self-start pt-12 font-mono text-xs tracking-[0.2em] uppercase">
+          Coming soon
+        </span>
+      ) : interactive ? (
+        <a
+          href={brand.href}
+          {...(brand.href.startsWith("http")
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
+          aria-label={`Visit the ${brand.name} website`}
+          className="group text-foreground/80 hover:text-foreground mt-auto inline-flex items-center gap-3 self-start pt-12 font-mono text-xs tracking-[0.2em] uppercase transition-colors duration-200"
+        >
+          Visit website
+          <span
+            aria-hidden
+            className="bg-accent text-accent-foreground inline-flex h-6 w-6 items-center justify-center rounded-md"
+          >
+            <RollingArrow iconSize={12} strokeWidth={2.2} />
+          </span>
+        </a>
+      ) : (
+        // Non-interactive stand-in so the sizer matches CTA height
+        <span className="mt-auto inline-flex items-center gap-3 self-start pt-12 font-mono text-xs tracking-[0.2em] uppercase">
+          Visit website
+          <span
+            aria-hidden
+            className="inline-flex h-6 w-6 items-center justify-center rounded-md"
+          />
+        </span>
+      )}
+    </>
+  );
+}
+
 export function Brands(): ReactNode {
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, { once: true, amount: 0.15 });
@@ -291,50 +345,32 @@ export function Brands(): ReactNode {
           transition={{ duration: 0.8, ease: easeOutExpo, delay: 0.1 }}
           className="mt-16 max-[850px]:mt-10 grid grid-cols-12 gap-6 max-[850px]:gap-6 rounded-2xl bg-background p-3 max-[850px]:p-3 text-foreground"
         >
-          {/* Desktop min-height keeps the card stable when switching brands; stacked layouts size to content */}
-          <div className="col-span-7 max-[1100px]:col-span-12 flex flex-col p-7 max-[850px]:p-4 min-h-[380px] max-[1100px]:min-h-0">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeBrand.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.35, ease: easeOutExpo }}
-                className="flex flex-1 flex-col"
+          {/* Grid stack: invisible copies size the panel to the tallest brand
+              so switching copy doesn't jump the layout (esp. on mobile). */}
+          <div className="col-span-7 max-[1100px]:col-span-12 grid p-7 max-[850px]:p-4 min-h-[380px] max-[1100px]:min-h-0">
+            {BRANDS.map((brand) => (
+              <div
+                key={`size-${brand.id}`}
+                aria-hidden
+                className="invisible col-start-1 row-start-1 flex flex-col"
               >
-                <h3 className="font-subhead text-[clamp(1.75rem,3vw,2.5rem)] font-medium leading-[1.05] tracking-tight">
-                  {activeBrand.name}
-                </h3>
-                <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-foreground/45">
-                  {activeBrand.tagline}
-                </p>
-                <p className="mt-6 max-w-[42ch] max-[1100px]:max-w-none text-balance text-xl font-light leading-snug text-foreground/65">
-                  {activeBrand.blurb}
-                </p>
-                {activeBrand.comingSoon ? (
-                  <span className="text-foreground/55 mt-8 inline-flex items-center gap-3 self-start font-mono text-xs tracking-[0.2em] uppercase min-[1101px]:mt-auto min-[1101px]:pt-12">
-                    Coming soon
-                  </span>
-                ) : (
-                  <a
-                    href={activeBrand.href}
-                    {...(activeBrand.href.startsWith("http")
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
-                    aria-label={`Visit the ${activeBrand.name} website`}
-                    className="group text-foreground/80 hover:text-foreground mt-8 inline-flex items-center gap-3 self-start font-mono text-xs tracking-[0.2em] uppercase transition-colors duration-200 min-[1101px]:mt-auto min-[1101px]:pt-12"
-                  >
-                    Visit website
-                    <span
-                      aria-hidden
-                      className="bg-accent text-accent-foreground inline-flex h-6 w-6 items-center justify-center rounded-md"
-                    >
-                      <RollingArrow iconSize={12} strokeWidth={2.2} />
-                    </span>
-                  </a>
-                )}
-              </motion.div>
-            </AnimatePresence>
+                <BrandCopy brand={brand} />
+              </div>
+            ))}
+            <div className="col-start-1 row-start-1 flex h-full min-h-0 flex-col">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeBrand.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35, ease: easeOutExpo }}
+                  className="flex min-h-full flex-1 flex-col"
+                >
+                  <BrandCopy brand={activeBrand} interactive />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
           <div

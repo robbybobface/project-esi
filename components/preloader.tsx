@@ -8,6 +8,7 @@ import { consumeFromGate } from "@/lib/from-gate";
 import { waveAccentGradient } from "@/lib/shader-variants";
 import {
   useEffect,
+  useEffectEvent,
   useLayoutEffect,
   useRef,
   useState,
@@ -50,20 +51,18 @@ export function Preloader(): ReactNode {
   // 0–1 driven by real checkpoints (load / fonts), not a fake ease
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(true);
-  const [fromGate, setFromGate] = useState(false);
-  const [lockupShown, setLockupShown] = useState(false);
+  // Read once on mount — sessionStorage latch is Strict Mode safe
+  const [fromGate] = useState(() => consumeFromGate());
 
   const finishedRef = useRef(false);
-  const fromGateRef = useRef(false);
-  const finishRef = useRef<() => void>(() => {});
 
-  finishRef.current = () => {
+  // Effect Event — always sees latest completeIntro without writing a ref in render
+  const finish = useEffectEvent(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
-    // React state — no module-singleton race with the hero
     completeIntro();
     setVisible(false);
-  };
+  });
 
   const bump = (value: number): void => {
     setProgress((prev) => Math.max(prev, value));
@@ -72,15 +71,30 @@ export function Preloader(): ReactNode {
   useLayoutEffect(() => {
     // Soft gate→home refresh keeps the provider mounted — re-arm the wait
     resetIntro();
-    const flagged = consumeFromGate();
-    fromGateRef.current = flagged;
-    setFromGate(flagged);
-    setLockupShown(true);
   }, [resetIntro]);
+
+  // Lock page scroll while the cover is up so a restored scrollY (or stray
+  // touch) can't leave the user mid-hero once the overlay dismisses
+  useLayoutEffect(() => {
+    if (!visible) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, [visible]);
 
   useEffect(() => {
     let cancelled = false;
-    const cover = fromGateRef.current ? FROM_GATE_COVER_MS : MIN_COVER_MS;
+    const cover = fromGate ? FROM_GATE_COVER_MS : MIN_COVER_MS;
 
     const safeBump = (value: number): void => {
       if (!cancelled) bump(value);
@@ -89,7 +103,10 @@ export function Preloader(): ReactNode {
     const dismiss = (): void => {
       if (cancelled) return;
       safeBump(1);
-      window.setTimeout(() => finishRef.current(), DISMISS_PAD_MS);
+      // Re-pin to top right before reveal — Safari often restores scroll
+      // asynchronously around load / paint
+      if (!window.location.hash) window.scrollTo(0, 0);
+      window.setTimeout(() => finish(), DISMISS_PAD_MS);
     };
 
     // Absolute ceiling — always leave, even if every wait hangs
@@ -132,7 +149,7 @@ export function Preloader(): ReactNode {
       cancelled = true;
       window.clearTimeout(failsafe);
     };
-  }, []);
+  }, [fromGate]);
 
   return (
     <AnimatePresence>
@@ -146,10 +163,10 @@ export function Preloader(): ReactNode {
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-background"
         >
           <motion.div
-            initial={false}
-            animate={
-              lockupShown ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }
+            initial={
+              fromGate ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }
             }
+            animate={{ opacity: 1, y: 0 }}
             transition={{
               duration: fromGate ? 0 : 0.5,
               ease: easeOutExpo,

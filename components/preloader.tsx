@@ -55,6 +55,7 @@ export function Preloader(): ReactNode {
   const [fromGate] = useState(() => consumeFromGate());
 
   const finishedRef = useRef(false);
+  const dismissedRef = useRef(false);
 
   // Effect Event — always sees latest completeIntro without writing a ref in render
   const finish = useEffectEvent(() => {
@@ -83,6 +84,8 @@ export function Preloader(): ReactNode {
     const prevBodyOverflow = body.style.overflow;
     html.style.overflow = "hidden";
     body.style.overflow = "hidden";
+    // Pin once when the cover mounts — never again on dismiss (that was
+    // yanking users back to top after they'd already started scrolling)
     if (!window.location.hash) {
       window.scrollTo(0, 0);
     }
@@ -95,22 +98,23 @@ export function Preloader(): ReactNode {
   useEffect(() => {
     let cancelled = false;
     const cover = fromGate ? FROM_GATE_COVER_MS : MIN_COVER_MS;
+    let failsafe = 0;
+    let dismissPadTimer = 0;
 
     const safeBump = (value: number): void => {
       if (!cancelled) bump(value);
     };
 
     const dismiss = (): void => {
-      if (cancelled) return;
+      if (cancelled || dismissedRef.current) return;
+      dismissedRef.current = true;
+      window.clearTimeout(failsafe);
       safeBump(1);
-      // Re-pin to top right before reveal — Safari often restores scroll
-      // asynchronously around load / paint
-      if (!window.location.hash) window.scrollTo(0, 0);
-      window.setTimeout(() => finish(), DISMISS_PAD_MS);
+      dismissPadTimer = window.setTimeout(() => finish(), DISMISS_PAD_MS);
     };
 
     // Absolute ceiling — always leave, even if every wait hangs
-    const failsafe = window.setTimeout(dismiss, HARD_FAILSAFE_MS);
+    failsafe = window.setTimeout(dismiss, HARD_FAILSAFE_MS);
 
     const run = async (): Promise<void> => {
       safeBump(0.12);
@@ -148,6 +152,7 @@ export function Preloader(): ReactNode {
     return () => {
       cancelled = true;
       window.clearTimeout(failsafe);
+      window.clearTimeout(dismissPadTimer);
     };
   }, [fromGate]);
 

@@ -28,7 +28,7 @@ const TEAM_MEMBERS: TeamMember[] = [
   },
   {
     name: "Matthew Brurs",
-    role: "Chief Operating Officer",
+    role: "VP of Operations",
     blurb:
       "Securities and lending veteran with a top-producer track record and a spotless reputation built over two decades.",
   },
@@ -37,6 +37,12 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Chief Creative Officer (AIG)",
     blurb:
       "40+ years leading immersive experience projects for AT&T, MTV, MGM, Resorts World, and Microsoft.",
+  },
+  {
+    name: "David Hinkle",
+    role: "Chief Operations Officer",
+    blurb:
+      "35+ years at the intersection of retail and real estate; co-founder of TORG, with 7 million square feet leased across 43 states.",
   },
   {
     name: "Luis De Santos",
@@ -55,12 +61,6 @@ const TEAM_MEMBERS: TeamMember[] = [
     role: "Company Advisor",
     blurb:
       "Former Chief Financial Officer of Patron Spirits with deep finance and strategy experience across industries.",
-  },
-  {
-    name: "Jeff Ross",
-    role: "Company Advisor",
-    blurb:
-      "45+ years in film and television; founder and CEO of Stellaris International Entertainment.",
   },
   {
     name: "Tim Searcy",
@@ -180,7 +180,7 @@ export function Team(): ReactNode {
 
   // Mouse drag-to-scroll (touch already scrolls natively)
   const dragStateRef = useRef<{ startX: number; startScroll: number } | null>(
-    null,
+    null
   );
 
   const onScrollerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -246,7 +246,7 @@ export function Team(): ReactNode {
           of ending on a hard overflow clip */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48 bg-gradient-to-t from-background from-20% via-background/75 to-transparent max-[850px]:h-56"
+        className="from-background via-background/75 pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48 bg-gradient-to-t from-20% to-transparent max-[850px]:h-56"
       />
 
       <div className="pointer-events-none relative z-10 mx-auto max-w-[1680px] px-10 pt-32 pb-64 max-[850px]:px-6 max-[850px]:pt-24 max-[850px]:pb-48">
@@ -292,7 +292,7 @@ export function Team(): ReactNode {
             ref={scrollerRef}
             // Focusable so keyboard users can scroll the row with arrow keys
             tabIndex={0}
-            className="focus-visible:outline-foreground/40 pointer-events-auto flex cursor-grab select-none active:cursor-grabbing gap-5 overflow-x-auto rounded-2xl pb-2 [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 [&::-webkit-scrollbar]:hidden"
+            className="focus-visible:outline-foreground/40 pointer-events-auto flex cursor-grab gap-5 overflow-x-auto rounded-2xl pb-2 select-none [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-4 active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
             role="list"
             aria-label="Team members"
             onPointerDown={onScrollerPointerDown}
